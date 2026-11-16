@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Inhaltscheck</title>
+  <style>body{font-family:system-ui;background:#0a0c16;color:#e8eaf6;padding:20px}.ok{color:#3ddc97}.bad{color:#ff4d6d}pre{white-space:pre-wrap;font-size:12px;color:#aaa}</style>
+</head>
+<body>
+  <h1>Inhaltscheck: Musterlösungen gegen Tests</h1>
+  <p>Jede Musterlösung muss alle Tests bestehen, jeder Startcode muss mindestens einen Test nicht bestehen.</p>
+  <div id="sum">läuft …</div>
+  <div id="out"></div>
+  <script>const save = { stars: {} };</script>
+  <script src="js/util.js?v=4"></script>
+  <script src="js/courses.js?v=4"></script>
+  <script src="content/python/t01.js?v=4"></script>
+  <script src="content/python/t02.js?v=4"></script>
+  <script src="content/python/t03.js?v=4"></script>
+  <script src="content/python/t04.js?v=4"></script>
+  <script src="content/python/t05.js?v=4"></script>
+  <script src="content/python/t06.js?v=4"></script>
+  <script src="content/python/t07.js?v=4"></script>
+  <script src="content/python/t08.js?v=4"></script>
+  <script src="content/python/t09.js?v=4"></script>
+  <script src="content/python/t10.js?v=4"></script>
+  <script src="js/runner/runner.js?v=4"></script>
+  <script>
+    (async () => {
+      const out = document.getElementById('out');
+      let bad = 0, n = 0;
+      for (const lv of courseLevels('python')) {
+        n++;
+        const from = lv.kind === 'project' ? Math.max(0, ...lv.steps.map((s, i) => (s.replaces ? i : 0))) : 0;
+        const tests = lv.kind === 'project' ? lv.steps.slice(from).flatMap((s) => [...(s.tests || []), ...(s.hidden || [])]) : [...(lv.tests || []), ...(lv.hidden || [])];
+        const firstTests = lv.kind === 'project' ? [...(lv.steps[0].tests || [])] : tests;
+        let msg = '';
+        try {
+          const r = await Runner.test('python', lv.solution, tests);
+          const fails = r.filter((x) => !x.ok);
+          if (fails.length) msg += 'Lösung scheitert: ' + JSON.stringify(fails, null, 1);
+          const s = await Runner.test('python', lv.starter || '', firstTests);
+          if (s.every((x) => x.ok)) msg += ' Startcode besteht schon alle Tests!';
+        } catch (e) { msg += 'Fehler: ' + e.message; }
+        if (msg) bad++;
+        out.insertAdjacentHTML('beforeend', `<div class="${msg ? 'bad' : 'ok'}">${msg ? '❌' : '✅'} ${lv.id} – ${esc(lv.title)}${msg ? `<pre>${esc(msg)}</pre>` : ''}</div>`);
+      }
+      document.getElementById('sum').innerHTML = `<b class="${bad ? 'bad' : 'ok'}">${n - bad}/${n} in Ordnung</b>`;
+      document.title = bad ? `FEHLER ${bad}` : `OK ${n}`;
+    })();
+  </script>
+</body>
+</html>

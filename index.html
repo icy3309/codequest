@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Nur eigene Dateien, Supabase und geprüfte Bibliotheken von jsDelivr (Supabase-Client, Pyodide) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://*.supabase.co wss://*.supabase.co; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Mausequest – Programmieren lernen</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐭</text></svg>">
+  <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+  <canvas id="fx"></canvas>
+
+  <header class="topbar">
+    <button class="logo" id="logo" title="Startseite"><canvas data-mouse="idle" width="24" height="14" aria-hidden="true"></canvas>MAUSE<span>QUEST</span></button>
+    <div class="meta">
+      <div class="pill" title="Tage in Folge gelernt">🔥 <b id="dayStreak">0</b></div>
+      <div class="pill" title="Gesammelte Sterne">⭐ <b id="starCount">0</b></div>
+      <div class="pill" title="Gesamtpunkte">🏆 <b id="totalScore">0</b></div>
+      <button class="pill rank" id="rank" aria-haspopup="true" aria-expanded="false" title="Alle Ränge anzeigen">Hello World ▾</button>
+      <button class="pill" id="accountBtn" hidden>🔑 Anmelden</button>
+      <button class="pill btn-icon" id="muteBtn" title="Ton an/aus">🔊</button>
+    </div>
+  </header>
+  <div class="rank-menu" id="rankMenu" hidden></div>
+
+  <main>
+    <!-- ===== STARTSEITE ===== -->
+    <section class="screen active" id="home">
+      <div class="hero">
+        <div>
+          <h1>Programmieren lernen – <span class="grad">Käsestück für Käsestück</span> 🧀</h1>
+          <p class="muted">Kurze Erklärung, ein Beispiel, eine Aufgabe. Dein Code wird sofort geprüft – und Mimi, deine Schraubermaus, feuert dich an.</p>
+        </div>
+        <canvas class="hero-mouse" data-mouse="cheer" width="24" height="14" aria-hidden="true"></canvas>
+      </div>
+      <div class="home-grid">
+        <div class="card continue" id="continueCard"></div>
+        <div class="card" id="questCard"></div>
+        <div class="card puzzle-teaser" id="puzzleTeaser"></div>
+      </div>
+      <h2>Sprachen</h2>
+      <div class="lang-grid" id="langGrid"></div>
+      <div class="home-links">
+        <button class="ghost" data-go="social">👥 Freunde &amp; Rangliste</button>
+        <button class="ghost" data-go="puzzle">🧠 Wochenrätsel</button>
+      </div>
+    </section>
+
+    <!-- ===== LEVEL-KARTE ===== -->
+    <section class="screen" id="map">
+      <div class="screen-head">
+        <button class="ghost back" data-back>← Zurück</button>
+        <h2 id="mapTitle"></h2>
+        <div class="muted" id="mapProgress"></div>
+      </div>
+      <div id="mapTopics"></div>
+    </section>
+
+    <!-- ===== LEVEL ===== -->
+    <section class="screen" id="level">
+      <div class="screen-head">
+        <button class="ghost back" data-back>← Karte</button>
+        <div>
+          <div class="crumb" id="lvCrumb"></div>
+          <h2 id="lvTitle"></h2>
+        </div>
+        <div class="lv-stars" id="lvStars"></div>
+      </div>
+      <div class="level-layout">
+        <div class="lesson" id="lvLesson"></div>
+        <div class="work">
+          <div class="task" id="lvTask"></div>
+          <div class="editor-wrap">
+            <div class="mouse-lane" id="mouseLane" title="Mimi anstupsen">
+              <canvas class="mouse-sprite" width="24" height="14" aria-hidden="true"></canvas>
+              <div class="mouse-bubble" role="status" aria-live="polite"></div>
+            </div>
+            <div class="editor-bar">
+              <span class="muted" id="edFile">main.py</span>
+              <span class="spacer"></span>
+              <button class="ghost sm" id="btnReset" title="Startcode wiederherstellen">↺ Zurücksetzen</button>
+              <button class="ghost sm" id="btnRun" title="Code ausführen (Strg+Enter)">▶ Ausführen</button>
+              <button class="primary sm" id="btnCheck" title="Gegen die Tests prüfen (Strg+Shift+Enter)">✔ Prüfen</button>
+            </div>
+            <div class="editor" id="editor"></div>
+            <div class="run-input" id="runInputBox" hidden>
+              <label>Eingaben für <code>input()</code> (eine pro Zeile):</label>
+              <textarea id="runInputs" rows="2" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div class="console" id="console"><span class="muted">Ausgabe erscheint hier. Tipp: <kbd>Strg</kbd>+<kbd>Enter</kbd> führt aus.</span></div>
+          <div class="results" id="results"></div>
+          <div class="help-row">
+            <button class="ghost sm" id="btnHint">💡 Hinweis</button>
+            <button class="ghost sm" id="btnClaude">🤖 Feedback von Claude</button>
+            <button class="ghost sm" id="btnSolution">👀 Lösung zeigen</button>
+          </div>
+          <div class="hints" id="hints"></div>
+          <div class="claude" id="claudeBox" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WOCHENRÄTSEL ===== -->
+    <section class="screen" id="puzzle">
+      <div class="screen-head">
+        <button class="ghost back" data-back>← Zurück</button>
+        <div><div class="crumb" id="pzWeek"></div><h2 id="pzTitle">Wochenrätsel</h2></div>
+        <div class="muted" id="pzCountdown"></div>
+      </div>
+      <div class="puzzle-layout">
+        <div>
+          <div class="seg" id="pzTiers"></div>
+          <div class="panel puzzle-text" id="pzText"></div>
+          <form class="panel inline-form" id="pzForm">
+            <input id="pzAnswer" placeholder="Deine Antwort" autocomplete="off" spellcheck="false">
+            <button class="primary">Antwort abgeben</button>
+            <span class="muted" id="pzMsg"></span>
+          </form>
+          <details class="panel">
+            <summary>🧪 Python-Spielwiese zum Rechnen</summary>
+            <p class="muted">Die Rätseldaten stehen schon in der Variablen <code>daten</code> (als Text). Gib am Ende mit <code>print()</code> deine Antwort aus.</p>
+            <div class="editor" id="pzEditor"></div>
+            <div class="editor-bar"><span class="spacer"></span><button class="primary sm" id="pzRun">▶ Ausführen</button></div>
+            <div class="console" id="pzConsole"></div>
+          </details>
+        </div>
+        <div>
+          <h3>🏁 Rangliste dieser Woche</h3>
+          <div class="seg" id="pzLbSeg"><button data-k="all" class="on">Alle</button><button data-k="friends">Freunde</button></div>
+          <div id="pzBoard"></div>
+          <p class="muted small">Leicht 100 · Mittel 200 · Schwer 400 Punkte. Die ersten drei pro Stufe bekommen +100 / +50 / +25 extra.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SOZIAL ===== -->
+    <section class="screen" id="social">
+      <div class="screen-head">
+        <button class="ghost back" data-back>← Zurück</button>
+        <h2>Freunde &amp; Rangliste</h2>
+        <div></div>
+      </div>
+      <div id="socialGate" class="gate" hidden></div>
+      <div id="socialHub" hidden>
+        <div class="tabs" id="socialTabs">
+          <button data-tab="friends" class="active">👥 Freunde <span class="badge" id="friendBadge" hidden></span></button>
+          <button data-tab="leaderboard">🏆 Rangliste</button>
+          <button data-tab="profile">🙂 Profil</button>
+        </div>
+        <div class="tab-panel" id="tab-friends">
+          <form class="panel inline-form" id="friendForm">
+            <input id="friendInput" placeholder="Spielername hinzufügen" autocomplete="off">
+            <button class="primary">Anfrage senden</button>
+            <span class="muted" id="friendMsg"></span>
+          </form>
+          <h3>Anfragen</h3><div id="friendRequests"></div>
+          <h3>Deine Freunde</h3><div id="friendList"></div>
+        </div>
+        <div class="tab-panel" id="tab-leaderboard" hidden>
+          <div class="seg" id="lbTabs">
+            <button data-lb="all" class="on">Gesamt</button>
+            <button data-lb="week">Diese Woche</button>
+            <button data-lb="friends">Freunde</button>
+          </div>
+          <div id="lbTable"></div>
+        </div>
+        <div class="tab-panel" id="tab-profile" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot"><a href="#" data-legal="imprint">Impressum</a> · <a href="#" data-legal="privacy">Datenschutz</a></footer>
+
+  <!-- ===== MODALS ===== -->
+  <div class="modal form" id="loginModal">
+    <div class="modal-box">
+      <button class="x" data-close>✕</button>
+      <div id="loginStep1">
+        <h3>Anmelden</h3>
+        <div class="seg" id="loginModeSeg"><button data-mode="link" class="on">Login-Link</button><button data-mode="pw">Passwort</button></div>
+        <form id="loginForm">
+          <input type="email" id="loginEmail" placeholder="E-Mail" required autocomplete="email">
+          <input type="password" id="loginPassword" placeholder="Passwort" hidden autocomplete="current-password">
+          <button class="primary" id="loginSubmit">Login-Link senden</button>
+        </form>
+        <p class="muted small" id="loginHint"></p>
+        <p class="err" id="loginErr"></p>
+      </div>
+      <div id="loginStep2" hidden>
+        <h3>📬 Schau in dein Postfach</h3>
+        <p>Wir haben einen Login-Link an <b id="loginSentTo"></b> geschickt.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal form" id="nameModal" data-closable="false">
+    <div class="modal-box">
+      <h3>Wähle deinen Spielernamen</h3>
+      <form id="nameForm">
+        <input id="nameInput" placeholder="z. B. kaese_maus" maxlength="16" autocomplete="off">
+        <button class="primary">Los geht's</button>
+      </form>
+      <p class="err" id="nameErr"></p>
+    </div>
+  </div>
+  <div class="modal" id="legalModal">
+    <div class="modal-box wide"><button class="x" data-close>✕</button><div id="legalBody"></div></div>
+  </div>
+  <div class="modal" id="doneModal">
+    <div class="modal-box done">
+      <canvas class="done-mouse" data-mouse="cheer" width="24" height="14" aria-hidden="true"></canvas>
+      <div class="done-stars" id="doneStars"></div>
+      <h3 id="doneHead"></h3>
+      <p id="doneText" class="muted"></p>
+      <div class="done-actions" id="doneActions"></div>
+    </div>
+  </div>
+
+  <div class="rankup" id="rankUp" hidden>
+    <div class="ru-inner"><div class="ru-label">RANG AUFGESTIEGEN</div><div class="ru-icon" id="ruIcon"></div><div class="ru-name" id="ruName"></div><div class="ru-sub" id="ruSub"></div></div>
+  </div>
+  <div class="toasts" id="toasts"></div>
+
+  <script src="js/config.js?v=4"></script>
+  <script src="js/util.js?v=3"></script>
+  <script src="js/store.js?v=3"></script>
+  <script src="js/fx.js?v=3"></script>
+  <script src="js/ui.js?v=3"></script>
+  <script src="js/courses.js?v=3"></script>
+  <script src="content/python/t01.js?v=3"></script>
+  <script src="content/python/t02.js?v=3"></script>
+  <script src="content/python/t03.js?v=3"></script>
+  <script src="content/python/t04.js?v=3"></script>
+  <script src="content/python/t05.js?v=3"></script>
+  <script src="content/python/t06.js?v=3"></script>
+  <script src="content/python/t07.js?v=3"></script>
+  <script src="content/python/t08.js?v=3"></script>
+  <script src="content/python/t09.js?v=3"></script>
+  <script src="content/python/t10.js?v=3"></script>
+  <script src="js/editor.js?v=3"></script>
+  <script src="js/runner/runner.js?v=3"></script>
+  <script src="js/net.js?v=3"></script>
+  <script src="js/ranks.js?v=3"></script>
+  <script src="js/social.js?v=3"></script>
+  <script src="js/quests.js?v=3"></script>
+  <script src="js/puzzles-data.js?v=3"></script>
+  <script src="js/puzzle.js?v=3"></script>
+  <script src="js/feedback.js?v=3"></script>
+  <script src="js/mascot.js?v=4"></script>
+  <script src="js/levels.js?v=3"></script>
+  <script src="js/legal.js?v=3"></script>
+  <script src="js/main.js?v=3"></script>
+</body>
+</html>
