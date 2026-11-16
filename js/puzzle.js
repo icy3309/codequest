@@ -80,8 +80,11 @@ async function submitPuzzle(e) {
       if (res.wait) { $('#pzMsg').textContent = `⏳ Zu viele Versuche – warte ${res.wait} Sekunden.`; btn.disabled = false; return; }
       if (ok) { await refreshProfile(); if (res.place) toast(`🏅 Platz ${res.place} in dieser Stufe!`); }
     } else {
-      ok = (await sha256Hex(`s${p.slot}t${tier}:${normAnswer(answer)}`)) === p.hash;
-      if (ok) { points = TIER_POINTS[tier]; save.total += points; }
+      // Antworten prüft nur der Server – so lassen sie sich nicht aus dem Code zurückrechnen.
+      $('#pzMsg').textContent = SUPABASE_CONFIGURED ? '🔑 Melde dich an – die Antwort wird auf dem Server geprüft.' : '📡 Antworten können nur online geprüft werden.';
+      if (SUPABASE_CONFIGURED && NET.ready && !NET.user) openLogin();
+      btn.disabled = false;
+      return;
     }
     if (!ok) { $('#pzMsg').textContent = '❌ Leider falsch. Prüf deinen Code nochmal!'; Sound.fail(); btn.disabled = false; return; }
     (save.puzzle[weekStart()] ||= {})[tier] = true;
@@ -98,7 +101,7 @@ async function loadPuzzleBoard() {
   const box = $('#pzBoard');
   if (!loggedIn()) { box.innerHTML = `<p class="muted small">${SUPABASE_CONFIGURED ? 'Melde dich an, um in der Wochen-Rangliste zu erscheinen.' : 'Die Rangliste gibt es, sobald der Online-Teil eingerichtet ist.'}</p>`; return; }
   $$('#pzLbSeg button').forEach((b) => b.classList.toggle('on', b.dataset.k === PZ.lb));
-  let q = NET.sb.from('puzzle_leaderboard').select('*').eq('week', weekStart()).order('points', { ascending: false }).order('last_solved', { ascending: true }).limit(30);
+  let q = NET.sb.rpc('get_puzzle_leaderboard', { p_week: weekStart() });
   if (PZ.lb === 'friends') { await loadFriends(false); q = q.in('user_id', [NET.user.id, ...SOC.friends.map((f) => f.id)]); }
   const { data, error } = await q;
   if (error) { box.innerHTML = `<p class="muted">Fehler: ${esc(error.message)}</p>`; return; }

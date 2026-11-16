@@ -22,7 +22,7 @@ Dann <http://localhost:8000> öffnen. Ohne weitere Einrichtung läuft alles **of
 ## Online-Teil einrichten (Freunde, Rangliste, Claude-Feedback)
 
 1. **Supabase-Projekt anlegen** auf <https://supabase.com> (neues, eigenes Projekt; Region am besten EU).
-2. **SQL ausführen:** Im Dashboard → *SQL Editor* den Inhalt von `supabase/schema.sql` einfügen und ausführen, danach `supabase/puzzles.sql`.
+2. **SQL ausführen:** Im Dashboard → *SQL Editor* nacheinander `supabase/schema.sql`, `supabase/update-1-security.sql`, den geheimen Pepper (Zeile `insert into public.app_secrets …` mit dem Wert aus `.puzzle-generator/pepper.txt`) und `supabase/puzzles.sql` ausführen.
 3. **Zugangsdaten eintragen:** *Project Settings → API* → `Project URL` und den `anon`/`publishable` Key in `js/config.js` eintragen. (Beide sind öffentlich – geschützt wird alles per Row-Level-Security.)
 4. **Login-Weiterleitung:** *Authentication → URL Configuration* → `Site URL` = `http://localhost:8000` (bzw. später die echte Adresse) und dieselbe Adresse unter *Redirect URLs* eintragen.
 5. **Claude-Feedback (Edge Function):**
@@ -75,7 +75,7 @@ Projekte haben `steps` (jeder mit `title`, `task`, `tests`, `hints`); Tests gelt
 
 ### Neues Wochenrätsel
 
-Das Generator-Skript liegt in `.puzzle-generator/` (per .gitignore nicht im Repo, weil man daraus die Antworten berechnen kann): `python3 .puzzle-generator/gen_puzzles.py js/puzzles-data.js supabase/puzzles.sql`. Neue Rätsel: Eintrag in `js/puzzles-data.js` (`hash` = SHA-256 von `s<slot>t<stufe>:<antwort ohne Leerzeichen, klein>`) und dieselbe Zeile in `weekly_puzzles` eintragen. Die Rätsel rotieren wöchentlich ab `PUZZLE_START`.
+Das Generator-Skript liegt in `.puzzle-generator/` (per .gitignore nicht im Repo, weil man daraus die Antworten berechnen kann): `python3 .puzzle-generator/gen_puzzles.py js/puzzles-data.js supabase/puzzles.sql`. Die Antworten prüft **nur der Server**: `answer_hash` = SHA-256 von `<pepper>:s<slot>t<stufe>:<antwort ohne Leerzeichen, klein>`; der Pepper liegt nur in `.puzzle-generator/pepper.txt` und in der Tabelle `app_secrets` (für niemanden lesbar). Der Generator erzeugt jedes Mal neue, zufällige Rätsel. Die Rätsel rotieren wöchentlich ab `PUZZLE_START`.
 
 ### Weitere Sprachen
 

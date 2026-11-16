@@ -1,7 +1,8 @@
 -- =========================================================
 --  Codequest – Supabase-Schema
 --  Einmal komplett im Supabase SQL-Editor ausführen (mehrfach ausführbar).
---  Danach supabase/puzzles.sql ausführen (Wochenrätsel).
+--  Danach supabase/update-1-security.sql, den geheimen Rätsel-Pepper
+--  (siehe dort) und zuletzt supabase/puzzles.sql ausführen.
 --
 --  Grundsatz: Der Browser darf fast nur LESEN. Punkte, Ränge, Rätsel
 --  und Aufgaben ändern sich ausschließlich über die Funktionen unten.

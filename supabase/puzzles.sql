@@ -1,15 +1,16 @@
--- Automatisch erzeugt: Wochenrätsel (Antworten nur als Hash).
+-- Automatisch erzeugt: Wochenrätsel. Hashes enthalten einen geheimen Zusatzwert (app_secrets.puzzle_pepper).
+delete from public.weekly_puzzles;
 insert into public.weekly_puzzles (slot, tier, title, answer_hash) values
-  (0, 1, 'Wo ist der Roboter?', '3439ddabbf90c09f347a9b67df7dc0c1875d97bcace1f2e99747b07dbf52bb5a'),
-  (0, 2, 'Besuchte Felder', '13578b98e709a1b1cc37580e96fdac8cda0999e93a0a43753588314afd56e704'),
-  (0, 3, 'Kisten im Weg', '6fcac310e3b8b0f4191a39ef2b0f47da767b749190a94eb18a5e9c0fe0f802d4'),
-  (1, 1, 'Vokal-Zähler', 'e736103f2c0359da4cf8c4e05be7047520822a6dff0177353fc6ff3bec9af903'),
-  (1, 2, 'Caesar knacken', '9a7b803416901df7d9f5b0ccb50408c21929d12e504d2c487a96e201e189d1fb'),
-  (1, 3, 'Anagramm-Gruppen', '09432e8c87c3682079f957d433efcac0bb1cd1137e15d6b864a6132bfcefcdbb'),
-  (2, 1, '3er und 7er', '3483bf4d249770e3b897867f822a58272a1cbafc4714d11893a9499b5c5acb04'),
-  (2, 2, 'Primzahl-Jagd', 'e56281e99f046464b3afdf597d59ad7d0695ecf8b018eff053354e1cdf7321d6'),
-  (2, 3, 'Die längste Collatz-Kette', '7fa33ff670b4005f502fe66b1a3a75be321cfe253e889a4826382f1ff6da44e9'),
-  (3, 1, 'Mias Punkte', '5a0b2370b3d706669f76cb8d57158d3d77be949c500771c2864b21729e1e937e'),
-  (3, 2, 'Wer gewinnt?', 'c0d0372a52784d053b41cb0417d0ec6393a98c1f6643a28136d8733b0c1f2f68'),
-  (3, 3, 'Die Liga-Tabelle', 'e313a4a9900b7256703b19eb5d8c993aa84affc478f82502e41310f0b09ee1e0')
+  (0, 1, 'Wo ist der Roboter?', 'fb2fb6f6a10661616f091f78e66f80a416030c2b51936c7ab8d1c246039fd8c6'),
+  (0, 2, 'Besuchte Felder', '864934bf5c0b424b23b0114e0e9a9b92cfe5b16d5d28a99a9aca48bf05300b02'),
+  (0, 3, 'Kisten im Weg', '985adf4019e3437c17e56c73e19a2163e95a6c385e26cbf4d4eac917eb08addf'),
+  (1, 1, 'Vokal-Zähler', '8eac9677a8265677eff4c7549a72429ca5816e7c460db26646a8086bbf443fd6'),
+  (1, 2, 'Caesar knacken', '0e311bb1e9bf2aac0035bc59a604e8a3241dc98b9677fc77da52f11993dcc8d2'),
+  (1, 3, 'Anagramm-Gruppen', 'ae38aabfdc09c874cd4236264364b8a6a999188aeb3d362a96a28a9acd44d6c5'),
+  (2, 1, '3er und 7er', '4c61f0255643fff76b4d310a4697b42459bd6365a52981cd3fcec885c77c12a2'),
+  (2, 2, 'Primzahl-Jagd', '641dbd0f389fa792b9edbda0e220025edb544c9f95026da884dfbfe18d5ba290'),
+  (2, 3, 'Die längste Collatz-Kette', '85f7e5e3c8027fa091844ffb22e02d9cffd8c97d766214dc9172c01c618deb05'),
+  (3, 1, 'Mias Punkte', '9987be5a1397cd04fc624517797f2cfafac2526abb3594e844a74653ef8b4a98'),
+  (3, 2, 'Wer gewinnt?', '4caa2f1f418c35308f032b2f0e1422e3d617e63625fb3304f37eb800a9dcf40c'),
+  (3, 3, 'Die Liga-Tabelle', 'b39c23ee5e032f032f103a8110f2b09667ea35542eaeafbde85ebd2f68e277c6')
 on conflict (slot, tier) do update set title = excluded.title, answer_hash = excluded.answer_hash;

@@ -67,8 +67,10 @@ function drawMouse(canvas, frame = 'idle', flip = false) {
   if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
   ctx.clearRect(0, 0, W, H);
   const g = FRAMES[frame] || FRAMES.idle;
+  const crown = typeof save !== 'undefined' && save.secretCheese > 0;
   for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
-    const col = MOUSE_PAL[g[r][c]];
+    const ch = crown && r === 0 && (c === 14 || c === 15) ? 'Y' : crown && r === 1 && (c === 14 || c === 15) ? 'Y' : g[r][c];
+    const col = MOUSE_PAL[ch];
     if (!col) continue;
     ctx.fillStyle = col;
     ctx.fillRect(flip ? W - 1 - c : c, r, 1, 1);
@@ -130,6 +132,11 @@ const Mascot = {
     this.bubble.classList.add('show');
     this.bubbleUntil = performance.now() + ms;
     this.nextTalk = performance.now() + 25000 + Math.random() * 15000;
+  },
+  /** Singt kurz zur Musik mit (nur wenn sie gerade fröhlich herumläuft). */
+  sing() {
+    if (!this.lane?.offsetParent || (this.mode !== 'walk' && this.mode !== 'idle')) return;
+    this.react('cheer', pick(['♪ piep piep ♪', '♫ pieps-di-piep ♫', '♪ la-la-piep ♪', '♫ mmh, Käsebeats ♫']), 900);
   },
   /** Kurzformen für die Level-Ansicht. */
   line(kind) { return pick(MOUSE_LINES[kind] || MOUSE_LINES.idle); },

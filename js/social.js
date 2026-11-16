@@ -171,6 +171,7 @@ function initFriends() {
     e.preventDefault();
     const name = $('#friendInput').value.trim(), msg = $('#friendMsg');
     if (!name) return;
+    if (!/^[A-Za-z0-9_]{3,16}$/.test(name)) { msg.textContent = '❌ Spielernamen haben 3–16 Zeichen: Buchstaben, Zahlen und _'; return; }
     try {
       const res = await rpc('add_friend', { p_username: name });
       const texts = { not_found: '❌ Spieler nicht gefunden.', self: '😄 Das bist du selbst.', exists: 'ℹ️ Anfrage wurde schon gesendet.', accepted: '🎉 Ihr seid jetzt Freunde!', requested: '✅ Anfrage gesendet!' };
@@ -206,7 +207,7 @@ async function loadLeaderboard() {
   let rows = [], myRank = null;
   try {
     if (k === 'week') {
-      const { data, error } = await sb.from('leaderboard_week').select('*').order('points', { ascending: false }).limit(50);
+      const { data, error } = await sb.rpc('get_leaderboard_week');
       if (error) throw error;
       rows = data.map((r) => ({ id: r.id, name: r.username, v: r.points, total: r.total_score }));
     } else {

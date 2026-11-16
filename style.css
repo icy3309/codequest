@@ -327,7 +327,20 @@ table.lb .ex { color: var(--muted); font-size: 13px; }
   .editor { font-size: 13px; }
   .hero-mouse { width: 120px; height: 70px; }
 }
+/* ---------- Musik-Knopf & Easter-Egg ---------- */
+.pill.off { opacity: .45; text-decoration: line-through; }
+.egg-badge { display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 999px; background: #fffbe8; border: 1.5px solid var(--cheese); font-size: 13px; font-weight: 700; }
+.egg-pop { position: fixed; z-index: 70; pointer-events: none; transform: translate(-50%, 0); font-weight: 800; color: var(--accent-d); font-size: 14px; animation: eggpop .9s ease-out forwards; text-shadow: 0 2px 0 #fff; }
+@keyframes eggpop { to { transform: translate(-50%, -36px); opacity: 0; } }
+.cheese-drop { position: fixed; top: -48px; z-index: 65; pointer-events: none; animation: cheesefall linear forwards; }
+@keyframes cheesefall { to { transform: translateY(calc(100vh + 80px)) rotate(540deg); } }
+.hero-mouse.boop { animation: boop .25s; }
+@keyframes boop { 50% { transform: scale(1.12, .9) translateY(4px); } }
+.hero-mouse.party { animation: party 1.2s ease-in-out 3; }
+@keyframes party { 25% { transform: translateY(-18px) rotate(-12deg); } 50% { transform: translateY(0) rotate(0); } 75% { transform: translateY(-18px) rotate(12deg); } }
+
 @media (prefers-reduced-motion: reduce) {
+  .hero-mouse.party, .hero-mouse.boop { animation: none; }
   .hero-mouse { animation: none; }
   .screen.active, .ru-inner, .toast { animation: none; }
 }

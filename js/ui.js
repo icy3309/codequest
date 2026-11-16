@@ -52,5 +52,6 @@ function initUI() {
     $('#starCount').textContent = totalStars();
     $('#totalScore').textContent = fmt(currentTotal());
     $('#muteBtn').textContent = save.muted ? '🔇' : '🔊';
+    $('#muteBtn').title = save.muted ? 'Soundeffekte an' : 'Soundeffekte aus';
   });
 }

@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Nur eigene Dateien, Supabase und geprüfte Bibliotheken von jsDelivr (Supabase-Client, Pyodide) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://*.supabase.co wss://*.supabase.co; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/ 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self' https://cdn.jsdelivr.net/pyodide/v0.26.4/ https://rqvfkpwqozovgqxinfqu.supabase.co wss://rqvfkpwqozovgqxinfqu.supabase.co; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Mausequest – Programmieren lernen</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐭</text></svg>">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <canvas id="fx"></canvas>
@@ -21,7 +21,8 @@
       <div class="pill" title="Gesamtpunkte">🏆 <b id="totalScore">0</b></div>
       <button class="pill rank" id="rank" aria-haspopup="true" aria-expanded="false" title="Alle Ränge anzeigen">Hello World ▾</button>
       <button class="pill" id="accountBtn" hidden>🔑 Anmelden</button>
-      <button class="pill btn-icon" id="muteBtn" title="Ton an/aus">🔊</button>
+      <button class="pill btn-icon" id="musicBtn" title="Musik an/aus">🎵</button>
+      <button class="pill btn-icon" id="muteBtn" title="Soundeffekte an/aus">🔊</button>
     </div>
   </header>
   <div class="rank-menu" id="rankMenu" hidden></div>
@@ -33,6 +34,7 @@
         <div>
           <h1>Programmieren lernen – <span class="grad">Käsestück für Käsestück</span> 🧀</h1>
           <p class="muted">Kurze Erklärung, ein Beispiel, eine Aufgabe. Dein Code wird sofort geprüft – und Mimi, deine Schraubermaus, feuert dich an.</p>
+          <span class="egg-badge" id="eggBadge" hidden></span>
         </div>
         <canvas class="hero-mouse" data-mouse="cheer" width="24" height="14" aria-hidden="true"></canvas>
       </div>
@@ -226,9 +228,9 @@
 
   <script src="js/config.js?v=4"></script>
   <script src="js/util.js?v=3"></script>
-  <script src="js/store.js?v=3"></script>
+  <script src="js/store.js?v=5"></script>
   <script src="js/fx.js?v=3"></script>
-  <script src="js/ui.js?v=3"></script>
+  <script src="js/ui.js?v=5"></script>
   <script src="js/courses.js?v=3"></script>
   <script src="content/python/t01.js?v=3"></script>
   <script src="content/python/t02.js?v=3"></script>
@@ -244,14 +246,16 @@
   <script src="js/runner/runner.js?v=3"></script>
   <script src="js/net.js?v=3"></script>
   <script src="js/ranks.js?v=3"></script>
-  <script src="js/social.js?v=3"></script>
+  <script src="js/social.js?v=6"></script>
   <script src="js/quests.js?v=3"></script>
-  <script src="js/puzzles-data.js?v=3"></script>
-  <script src="js/puzzle.js?v=3"></script>
+  <script src="js/puzzles-data.js?v=6"></script>
+  <script src="js/puzzle.js?v=6"></script>
   <script src="js/feedback.js?v=3"></script>
-  <script src="js/mascot.js?v=4"></script>
+  <script src="js/mascot.js?v=5"></script>
+  <script src="js/music.js?v=1"></script>
+  <script src="js/easter.js?v=2"></script>
   <script src="js/levels.js?v=3"></script>
   <script src="js/legal.js?v=3"></script>
-  <script src="js/main.js?v=3"></script>
+  <script src="js/main.js?v=5"></script>
 </body>
 </html>
