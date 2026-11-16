@@ -195,3 +195,100 @@ const Mascot = {
 function paintStaticMice() {
   $$('canvas[data-mouse]').forEach((cv) => drawMouse(cv, cv.dataset.mouse, cv.dataset.flip === '1'));
 }
+
+/* =========================================================
+   Startseite: Mimi macht kleine Kunststückchen – blinzeln,
+   umschauen, schrauben, ein Stück trippeln, hüpfen, träumen.
+   ========================================================= */
+const HeroMouse = {
+  cv: null, stage: null, bubble: null, act: null, actStart: 0, actLen: 0, x: 0, flip: false, t0: 0, raf: 0,
+  reduce: matchMedia('(prefers-reduced-motion: reduce)').matches,
+  ACTS: [
+    ['idle', 5], ['look', 2], ['tinker', 2], ['scoot', 2], ['hop', 2], ['think', 2], ['sleepy', 1],
+  ],
+  THOUGHTS: ['🧀?', '💭 Käse …', '♪ ♫', '💕', 'Weiter lernen? 🐭', '✨', 'Piep!'],
+
+  init() {
+    this.cv = $('.hero-mouse');
+    this.stage = $('.hero-stage');
+    this.bubble = $('.hero-bubble');
+    if (!this.cv || !this.stage) return;
+    this.next(performance.now());
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) this.start(); });
+    this.start();
+  },
+  start() { if (!this.raf) this.raf = requestAnimationFrame((t) => this.tick(t)); },
+
+  /** Nächstes Kunststück auswählen (gewichteter Zufall). */
+  next(now) {
+    const pool = this.reduce ? [['idle', 1], ['look', 1], ['think', 1]] : this.ACTS;
+    const sum = pool.reduce((a, [, w]) => a + w, 0);
+    let r = Math.random() * sum;
+    let act = pool[0][0];
+    for (const [name, w] of pool) { if ((r -= w) < 0) { act = name; break; } }
+    if (act === this.act && act !== 'idle') act = 'idle';
+    this.act = act;
+    this.actStart = now;
+    this.actLen = { idle: 2500 + Math.random() * 2000, look: 1400, tinker: 1700, scoot: 2600, hop: 900, think: 2600, sleepy: 3000 }[act];
+    if (act === 'think') this.say(this.THOUGHTS[Math.floor(Math.random() * this.THOUGHTS.length)]);
+    if (act === 'sleepy') this.say('Zzz … 💤');
+    if (act === 'tinker') this.say('🔧');
+  },
+  say(text) {
+    if (!this.bubble) return;
+    this.bubble.textContent = text;
+    this.bubble.classList.add('show');
+    clearTimeout(this.bubbleTimer);
+    this.bubbleTimer = setTimeout(() => this.bubble.classList.remove('show'), 2200);
+  },
+
+  tick(now) {
+    this.raf = 0;
+    if (document.hidden) return;
+    if (!this.cv.offsetParent) { setTimeout(() => this.start(), 600); return; }
+    if (typeof EGG !== 'undefined' && EGG.busy) { this.raf = requestAnimationFrame((t) => this.tick(t)); return; } // Käseparty läuft
+    const p = Math.min(1, (now - this.actStart) / this.actLen);
+    let frame = 'idle', y = 0, flip = false;
+    const blink = (now % 3400) < 140;
+    switch (this.act) {
+      case 'idle':
+        frame = blink ? 'blink' : 'idle';
+        y = this.reduce ? 0 : Math.sin(now / 420) * 2.5; // sanftes Atmen
+        break;
+      case 'look':
+        flip = p > 0.15 && p < 0.85;
+        frame = blink ? 'blink' : 'idle';
+        break;
+      case 'tinker':
+        frame = Math.floor(now / 120) % 2 ? 'fix2' : 'fix1';
+        break;
+      case 'scoot': {
+        // ein Stück nach links trippeln und wieder zurück
+        const out = p < 0.5;
+        const q = out ? p * 2 : (p - 0.5) * 2;
+        this.x = (out ? q : 1 - q) * -46;
+        flip = out;
+        frame = Math.floor(now / 140) % 2 ? 'walk2' : 'walk1';
+        y = Math.abs(Math.sin(now / 70)) * 1.5;
+        break;
+      }
+      case 'hop':
+        frame = 'cheer';
+        y = Math.sin(p * Math.PI) * 22;
+        break;
+      case 'think':
+        frame = p > 0.4 && p < 0.5 ? 'blink' : 'idle';
+        y = Math.sin(now / 600) * 1.5;
+        break;
+      case 'sleepy':
+        frame = 'blink';
+        y = Math.sin(now / 700) * 1.5;
+        break;
+    }
+    if (this.act !== 'scoot') this.x *= 0.9;
+    drawMouse(this.cv, frame, flip);
+    this.stage.style.transform = `translate(${this.x.toFixed(1)}px, ${(-y).toFixed(1)}px)`;
+    if (p >= 1) this.next(now);
+    this.raf = requestAnimationFrame((t) => this.tick(t));
+  },
+};

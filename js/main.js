@@ -42,6 +42,7 @@ function init() {
   Mascot.init();
   initMusic();
   initEaster();
+  HeroMouse.init();
   onEnter('home', renderHome);
   onEnter('social', () => { renderSocial(true); setPresenceActivity('Freunde & Rangliste'); });
   $('#langGrid').addEventListener('click', (e) => { const b = e.target.closest('[data-lang]'); if (b && !b.disabled) openMap(b.dataset.lang); });
