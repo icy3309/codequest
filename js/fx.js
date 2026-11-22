@@ -65,7 +65,19 @@ const Sound = {
   },
   ok() { [523, 659, 784].forEach((f, i) => this.note(f, 0.18, { type: 'triangle', when: i * 0.07 })); },
   fail() { this.note(260, 0.25, { type: 'square', vol: 0.03, to: 130 }); },
-  win() { this.squeak(); [523, 659, 784, 1046, 1318].forEach((f, i) => this.note(f, 0.3, { type: 'triangle', vol: 0.06, when: i * 0.09 })); },
+  win() { this.animal(); [523, 659, 784, 1046, 1318].forEach((f, i) => this.note(f, 0.3, { type: 'triangle', vol: 0.06, when: i * 0.09 })); },
+  /** Das Geräusch des aktuellen Maskottchens: Maus piept, Erdhörnchen tschirpt, Capybara pfeift leise und schnurrt. */
+  animal() {
+    const t = document.documentElement.dataset.theme;
+    if (t === 'squirrel') return this.chirp();
+    if (t === 'capy') return this.capy();
+    return this.squeak();
+  },
+  chirp() { [0, 0.07, 0.14].forEach((w, i) => this.note(3200 - i * 150, 0.045, { type: 'square', vol: 0.022, when: w, to: 2300 })); },
+  capy() {
+    this.note(720, 0.16, { type: 'sine', vol: 0.045, to: 980 });
+    for (let k = 0; k < 7; k++) this.note(95, 0.045, { type: 'triangle', vol: 0.06, when: 0.18 + k * 0.05 });
+  },
   squeak() { this.note(1800, 0.07, { type: 'sine', vol: 0.04, to: 2600 }); this.note(2100, 0.09, { type: 'sine', vol: 0.035, when: 0.09, to: 3000 }); },
   coin() { this.note(988, 0.08, { type: 'square', vol: 0.03 }); this.note(1318, 0.25, { type: 'square', vol: 0.03, when: 0.08 }); },
 };

@@ -159,29 +159,13 @@ function drawMouse(canvas, frame = 'idle', flip = false) {
   const crown = typeof save !== 'undefined' && save.secretCheese > 0;
   for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
     const ch = crown && sp.crown.includes(r) && (c === 14 || c === 15) ? 'Y' : g[r][c];
-    const col = sp.pal[ch];
+    const col = crown && sp === CAPY && (ch === 'O' || ch === 'o') ? (ch === 'O' ? '#ffd23f' : '#fff3a6') : sp.pal[ch];
     if (!col) continue;
     ctx.fillStyle = col;
     ctx.fillRect(flip ? W - 1 - c : c, r, 1, 1);
   }
 }
 
-const MOUSE_LINES = {
-  idle: [
-    'Du schaffst das! 🧀', 'Ich glaub an dich! 💕', 'Ein Käsestück nach dem anderen 🧀',
-    'Fehler sind nur Krümel auf dem Weg 🍪', 'Piep piep – weiter so! 🐭', 'Programmieren ist wie Käse suchen: dranbleiben! 🔍',
-    'Kleine Schritte, großer Käse 🧀', 'Ich halt schon mal den Schraubendreher bereit 🔧', 'Du bist richtig gut darin! ✨',
-    'Pause machen ist auch erlaubt ☕', 'Noch ein Level bis zum nächsten Käse! 🧀',
-  ],
-  run: ['Ich schraub mal mit … 🔧', 'Mal sehen, was passiert … 👀', 'Los geht’s! 🐭💨'],
-  pass: ['Juhuu! 🎉', 'Käse für dich! 🧀🧀🧀', 'Du bist die Beste! 💖', 'Perfekt geschraubt! 🔧✨', 'Piiiiep! Geschafft! 🎉'],
-  fail: ['Fast! Du schaffst das 💪', 'Nicht schlimm – nochmal probieren! 🧀', 'Ein Krümel fehlt noch 🍪', 'Fehler sind zum Lernen da 💕'],
-  error: ['Huch! Lies mal die Meldung unten 🔍', 'Da klemmt was – ich schau mit 🔧'],
-  hint: ['Gute Idee – Hilfe holen ist schlau! 💡', 'Ein kleiner Tipp kann Wunder wirken ✨'],
-  dizzy: ['Puh, mir ist ganz schwindelig 😵 – Endlosschleife?', 'Ich renn im Kreis … 🌀 Endet deine Schleife?'],
-  click: ['Piep! 🐭', 'Hihi, das kitzelt! 💕', 'Hallo du! 👋', 'Hast du Käse dabei? 🧀', 'Ich bin Mimi, deine Schraubermaus! 🔧'],
-};
-const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const Mascot = {
   lane: null, cv: null, bubble: null,
@@ -196,7 +180,7 @@ const Mascot = {
     const now = performance.now();
     this.nextIdle = now + 4000 + Math.random() * 5000;
     this.nextTalk = now + 8000;
-    this.lane.addEventListener('click', () => this.react('cheer', pick(MOUSE_LINES.click), 1200, true));
+    this.lane.addEventListener('click', () => this.react('cheer', flavorLine('click'), 1200, true));
     document.addEventListener('visibilitychange', () => { if (!document.hidden) this.start(); });
     this.start();
   },
@@ -212,7 +196,7 @@ const Mascot = {
     this.mode = mode;
     this.modeUntil = now + ms;
     if (text) this.say(text, Math.max(ms, 2600));
-    if (squeak) Sound.squeak?.();
+    if (squeak) Sound.animal?.();
     this.start();
   },
   say(text, ms = 3000) {
@@ -225,10 +209,10 @@ const Mascot = {
   /** Singt kurz zur Musik mit (nur wenn sie gerade fröhlich herumläuft). */
   sing() {
     if (!this.lane?.offsetParent || (this.mode !== 'walk' && this.mode !== 'idle')) return;
-    this.react('cheer', pick(['♪ piep piep ♪', '♫ pieps-di-piep ♫', '♪ la-la-piep ♪', '♫ mmh, Käsebeats ♫']), 900);
+    this.react('cheer', flavorLine('sing'), 900);
   },
   /** Kurzformen für die Level-Ansicht. */
-  line(kind) { return pick(MOUSE_LINES[kind] || MOUSE_LINES.idle); },
+  line(kind) { return flavorLine(kind); },
 
   tick(now) {
     this.raf = 0;
@@ -243,7 +227,7 @@ const Mascot = {
     if (this.mode !== 'walk' && this.mode !== 'idle' && now > this.modeUntil) this.mode = 'walk';
     if (this.mode === 'idle' && now > this.modeUntil) { this.mode = 'walk'; this.nextIdle = now + 5000 + Math.random() * 7000; }
     if (this.mode === 'walk' && now > this.nextIdle) { this.mode = 'idle'; this.modeUntil = now + 1500 + Math.random() * 2500; }
-    if (now > this.nextTalk && this.mode !== 'sad') this.say(pick(MOUSE_LINES.idle), 3500);
+    if (now > this.nextTalk && this.mode !== 'sad') this.say(flavorLine('idle'), 3500);
     if (this.bubbleUntil && now > this.bubbleUntil) { this.bubble.classList.remove('show'); this.bubbleUntil = 0; }
 
     let frame = 'idle', jump = 0;
@@ -297,7 +281,6 @@ const HeroMouse = {
   ACTS: [
     ['idle', 5], ['look', 2], ['tinker', 2], ['scoot', 2], ['hop', 2], ['think', 2], ['sleepy', 1],
   ],
-  THOUGHTS: ['🧀?', '💭 Käse …', '♪ ♫', '💕', 'Weiter lernen? 🐭', '✨', 'Piep!'],
 
   init() {
     this.cv = $('.hero-mouse');
@@ -321,8 +304,8 @@ const HeroMouse = {
     this.act = act;
     this.actStart = now;
     this.actLen = { idle: 2500 + Math.random() * 2000, look: 1400, tinker: 1700, scoot: 2600, hop: 900, think: 2600, sleepy: 3000 }[act];
-    if (act === 'think') this.say(this.THOUGHTS[Math.floor(Math.random() * this.THOUGHTS.length)]);
-    if (act === 'sleepy') this.say('Zzz … 💤');
+    if (act === 'think') this.say(flavorLine('thoughts'));
+    if (act === 'sleepy') this.say(flavorLine('sleepy'));
     if (act === 'tinker') this.say('🔧');
   },
   say(text) {

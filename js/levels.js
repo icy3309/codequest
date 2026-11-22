@@ -42,7 +42,7 @@ function openLevel(id) {
   showScreen('level');
   renderLevel();
   setPresenceActivity(`${info.lang.name} · Level ${levelNo(info.level)}`);
-  setTimeout(() => Mascot.say(isProject(info.level) ? `Ein Projekt! Ich hab den Schraubendreher bereit 🔧` : `Los geht’s mit „${info.level.title}“! 🐭`, 3500), 400);
+  setTimeout(() => Mascot.say(isProject(info.level) ? flavorLine('project') : `Los geht’s mit „${info.level.title}“! ${flavor().snackIcon}`, 3500), 400);
   Runner.for(LV.lang).boot?.().catch((e) => consoleShow(`<span class="err-line">${esc(e.message)}</span>`));
 }
 
@@ -362,7 +362,7 @@ function levelSolved() {
   refreshHeader();
   checkRankUp();
   $('#lvStars').innerHTML = starsHtml(save.stars[lv.id]);
-  isProject(lv) ? (confetti(), Sound.win()) : (burst(innerWidth / 2, innerHeight / 3, '#ff6fa8', 50), Sound.squeak());
+  isProject(lv) ? (confetti(), Sound.win()) : (burst(innerWidth / 2, innerHeight / 3, getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ff6fa8', 50), Sound.animal());
   Mascot.react('cheer', Mascot.line('pass'), 3000);
   const nxt = nextLevel(lv.id);
   const why = stars < 3 ? `<br><span class="small">${LV.solution ? 'Lösung angesehen → 1 Stern.' : [LV.hints ? 'Hinweis genutzt (−1 ★)' : '', LV.fails >= 4 ? 'viele Fehlversuche (−1 ★)' : ''].filter(Boolean).join(' · ')}</span>` : '';

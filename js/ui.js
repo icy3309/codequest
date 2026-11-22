@@ -64,9 +64,9 @@ function initUI() {
 
 /* ---------- Modi: Farben, Maskottchen, Titel ---------- */
 const THEME_INFO = {
-  mouse: { title: 'Mause Quest', logo: 'MAUSE <span>QUEST</span>', icon: '🐭', hello: 'Guten Morgen! ☀️🐭' },
-  squirrel: { title: 'Gurt Quest', logo: 'GURT <span>QUEST</span>', icon: '🐿️', hello: 'Nachtschicht! 🌙🐿️' },
-  capy: { title: 'CapyQuest', logo: 'CAPY<span>QUEST</span>', icon: '🍊', hello: 'Ab in den Teich! 🍊💦' },
+  mouse: { title: 'Mause Quest', logo: 'MAUSE <span>QUEST</span>', icon: '🐭' },
+  squirrel: { title: 'Gurt Quest', logo: 'GURT <span>QUEST</span>', icon: '🐿️' },
+  capy: { title: 'CapyQuest', logo: 'CAPY<span>QUEST</span>', icon: '🍊' },
 };
 function setTheme(theme, announce) {
   if (!THEME_INFO[theme]) theme = 'mouse';
@@ -84,6 +84,17 @@ function setTheme(theme, announce) {
     b.setAttribute('aria-checked', String(on));
     if (on) $('#themeSeg').style.setProperty('--ti', i);
   });
+  // Tier-Texte (js/flavor.js): Startseite, Platzhalter, Ränge, Easter-Badge
+  const fl = flavor();
+  $('#heroSnack').textContent = fl.snack;
+  $('#heroSnackIcon').textContent = fl.snackIcon;
+  $('#heroWho').textContent = `${fl.name}, ${fl.who},`;
+  $('#mouseLane').title = `${fl.name} anstupsen`;
+  $('.hero-mouse').title = fl.name;
+  $('#nameInput').placeholder = `z. B. ${fl.namePh}`;
+  if (typeof RANKS !== 'undefined') fl.ranks.forEach(([n, icon], k) => { if (RANKS[k]) { RANKS[k][1] = n; RANKS[k][2] = icon; } });
+  if (typeof renderEggBadge === 'function') renderEggBadge();
   if (typeof paintStaticMice === 'function') paintStaticMice();
-  if (announce && typeof Mascot !== 'undefined' && Mascot.lane?.offsetParent) Mascot.say(info.hello);
+  refreshHeader();
+  if (announce && typeof Mascot !== 'undefined' && Mascot.lane?.offsetParent) Mascot.say(fl.lines.hello);
 }

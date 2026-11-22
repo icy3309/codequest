@@ -1,8 +1,9 @@
 'use strict';
 /* =========================================================
-   „Käsekrümel-Café“ – ein Lofi-Song, live im Browser erzeugt
+   „Käsekrümel-Café“ (bzw. Nuss- und Teich-Café) – ein Lofi-Song, live im Browser erzeugt
    (WebAudio, keine Audiodateien). ~76 BPM, ca. 2:45 lang, läuft
-   in Schleife. Ab und zu quietscht Mimi mit. 🐭🎶
+   in Schleife. Ab und zu singt das Maskottchen mit (Maus piept,
+   Erdhörnchen tschirpt, Capybara pfeift). 🎶
    Ein/aus über den 🎵-Knopf oben (save.music).
    ========================================================= */
 const mtof = (m) => 440 * 2 ** ((m - 69) / 12);
@@ -128,7 +129,7 @@ const Music = {
     if (bar.hats && s % 2 === 0) this.hat(t, (s % 4 === 2 ? 0.05 : 0.03) * vol);
     if (bar.hats === 2 && s % 2 === 1 && (step * 7) % 5 === 0) this.hat(t, 0.02 * vol);
     if (bar.mel) this.melodyStep(bar, s, t, vol);
-    // Mimi quietscht ab und zu mit 🐭
+    // Das Maskottchen singt ab und zu mit
     if (s === 6 && bar.barInPart % 8 === 5 && bar.drums) this.squeak(t, 0.05 * vol);
   },
 
@@ -188,15 +189,19 @@ const Music = {
   snare(t, vol) { this.noise(t, 0.22, vol, { freq: 1600, q: 0.7 }); this.voice(190, t, 0.12, vol * 0.5, { type: 'triangle', attack: 0.002 }); },
   hat(t, vol) { this.noise(t, 0.05, vol, { type: 'highpass', freq: 7000, q: 0.5 }); },
   squeak(t, vol) {
-    const c = this.ctx;
-    [[1900, 2700, 0], [2200, 3100, 0.11]].forEach(([a, b, dt]) => {
+    const c = this.ctx, theme = document.documentElement.dataset.theme;
+    // Maus: zwei Pieps · Erdhörnchen: drei kurze Tschirps · Capybara: weicher Pfiff
+    const calls = theme === 'squirrel' ? [[3100, 2400, 0, 0.05, 'square', 0.5], [3000, 2300, 0.08, 0.05, 'square', 0.5], [2900, 2200, 0.16, 0.05, 'square', 0.5]]
+      : theme === 'capy' ? [[650, 900, 0, 0.18, 'sine', 1.2], [700, 820, 0.22, 0.14, 'sine', 1]]
+      : [[1900, 2700, 0, 0.09, 'sine', 1], [2200, 3100, 0.11, 0.09, 'sine', 1]];
+    calls.forEach(([a, b, dt, len, type, v]) => {
       const o = c.createOscillator(), g = c.createGain();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(a, t + dt); o.frequency.exponentialRampToValueAtTime(b, t + dt + 0.07);
-      g.gain.setValueAtTime(0.0001, t + dt); g.gain.linearRampToValueAtTime(vol, t + dt + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dt + 0.09);
-      o.connect(g).connect(this.out); o.start(t + dt); o.stop(t + dt + 0.12);
+      o.type = type;
+      o.frequency.setValueAtTime(a, t + dt); o.frequency.exponentialRampToValueAtTime(b, t + dt + len * 0.8);
+      g.gain.setValueAtTime(0.0001, t + dt); g.gain.linearRampToValueAtTime(vol * v, t + dt + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dt + len);
+      o.connect(g).connect(this.out); o.start(t + dt); o.stop(t + dt + len + 0.03);
     });
-    // Mimi zeigt, dass sie mitsingt
+    // … und zeigt in der Sprechblase, dass es mitsingt
     const delay = Math.max(0, (t - c.currentTime) * 1000);
     setTimeout(() => { if (this.playing && typeof Mascot !== 'undefined') Mascot.sing?.(); }, delay);
   },

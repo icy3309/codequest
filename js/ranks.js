@@ -44,7 +44,7 @@ function renderRankMenu(dist) {
       <div><div class="rm-title" style="color:${RANKS[cur][3]}">${esc(RANKS[cur][1])}</div><div class="muted">${fmt(total)} Punkte</div></div></div>
     ${next ? `<div class="rm-next"><div class="bar"><div class="bar-fill" style="width:${progress}%;background:${next[3]}"></div></div>
       Noch <b>${fmt(next[0] - total)} Punkte</b> bis <b style="color:${next[3]}">${next[2]} ${esc(next[1])}</b></div>`
-      : '<div class="rm-next"><b>Höchster Rang erreicht – du bist die Mäusekönigin! 👑</b></div>'}
+      : `<div class="rm-next"><b>Höchster Rang erreicht – du bist die ${esc(RANKS[RANKS.length - 1][1])}! 👑</b></div>`}
     <ul class="rm-list">${RANKS.map(([min, name, icon, color], i) => `
       <li class="${i === cur ? 'me' : i < cur ? 'done' : ''}" style="--rc:${color}">
         <span>${icon}</span><span class="rm-n"><b>${esc(name)}</b><small>ab ${fmt(min)} Punkten</small></span>

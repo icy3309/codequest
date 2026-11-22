@@ -1,14 +1,14 @@
 'use strict';
 /* =========================================================
-   🧀 Easter-Egg: Mimis geheimes Käseversteck.
+   Easter-Egg: das geheime Versteck des Maskottchens
+   (🐭 Käseversteck · 🐿️ Nussversteck · 🍊 Orangen-Oase).
    Auslöser auf der Startseite:
-   - die große Maus 7× schnell hintereinander anklicken, oder
-   - einfach „piep“ tippen.
-   Belohnung: Käseregen, Tanz, Melodie – und Mimi trägt ab dann
-   ein kleines Käsekrönchen.
+   - das große Maskottchen 7× schnell hintereinander anklicken, oder
+   - das Tier-Wort tippen: „piep“ (Maus), „nuss“ (Erdhörnchen), „capy“ (Capybara).
+   Belohnung: Regen aus Käse/Nüssen/Orangen, Tanz, Melodie – danach
+   Krönchen (bzw. goldene Orange beim Capybara). Texte: js/flavor.js
    ========================================================= */
 const EGG = { clicks: 0, lastClick: 0, typed: '', busy: false };
-const EGG_HINTS = ['piep?', 'hihi', 'nicht kitzeln!', 'piiiep!', 'noch ein bisschen …', 'fast …!'];
 
 function eggPop(text, x, y) {
   const el = document.createElement('div');
@@ -25,8 +25,8 @@ function cheeseParty() {
   save.secretCheese = (save.secretCheese || 0) + 1;
   persist();
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // Käseregen
-  const items = ['🧀', '🧀', '🧀', '🐭', '💕', '✨', '🧀'];
+  // Regen aus Käse / Nüssen / Orangen
+  const items = flavor().egg.rain;
   const n = reduce ? 12 : 42;
   for (let i = 0; i < n; i++) {
     const s = document.createElement('span');
@@ -39,7 +39,7 @@ function cheeseParty() {
     document.body.appendChild(s);
     setTimeout(() => s.remove(), 5000);
   }
-  // Mimi tanzt
+  // Das Maskottchen tanzt
   const hero = $('.hero-mouse');
   hero?.classList.add('party');
   if (hero) {
@@ -47,13 +47,15 @@ function cheeseParty() {
     const dance = setInterval(() => { drawMouse(hero, ['cheer', 'idle', 'cheer', 'blink'][f++ % 4], f % 2 === 0); }, 220);
     setTimeout(() => { clearInterval(dance); hero.classList.remove('party'); drawMouse(hero, 'cheer'); EGG.busy = false; }, 3600);
   } else EGG.busy = false;
-  // Kleine Quietsch-Melodie (Soundeffekt, folgt dem 🔊-Schalter)
-  [1568, 1760, 2093, 1760, 2349, 2637].forEach((f, i) => Sound.note(f, 0.12, { type: 'sine', vol: 0.045, when: i * 0.11, to: f * 1.25 }));
+  // Kleine Tier-Melodie (Soundeffekt, folgt dem 🔊-Schalter)
+  const theme = document.documentElement.dataset.theme;
+  if (theme === 'capy') [392, 523, 659, 523, 784].forEach((f, i) => Sound.note(f, 0.22, { type: 'triangle', vol: 0.06, when: i * 0.16 }));
+  else if (theme === 'squirrel') [2637, 2349, 2637, 3136, 2637, 3520].forEach((f, i) => Sound.note(f, 0.06, { type: 'square', vol: 0.02, when: i * 0.08, to: f * 0.8 }));
+  else [1568, 1760, 2093, 1760, 2349, 2637].forEach((f, i) => Sound.note(f, 0.12, { type: 'sine', vol: 0.045, when: i * 0.11, to: f * 1.25 }));
+  setTimeout(() => Sound.animal(), 900);
   confetti();
   const first = save.secretCheese === 1;
-  toast(first
-    ? '🧀 <b>Psst … du hast Mimis geheimes Käseversteck gefunden!</b><br>Zur Belohnung trägt Mimi jetzt ein Käsekrönchen. 👑'
-    : `🧀 Käseparty Nr. ${save.secretCheese}! Mimi freut sich riesig. 🐭💕`, [], 7000);
+  toast(first ? flavor().egg.first : flavor().egg.again(save.secretCheese), [], 7000);
   renderEggBadge();
 }
 
@@ -62,7 +64,7 @@ function renderEggBadge() {
   if (!box) return;
   const n = save.secretCheese || 0;
   box.hidden = !n;
-  box.textContent = n ? `🧀 Geheimer Käsefinder${n > 1 ? ` ×${n}` : ''}` : '';
+  box.textContent = n ? `${flavor().egg.badge}${n > 1 ? ` ×${n}` : ''}` : '';
 }
 
 function initEaster() {
@@ -73,17 +75,18 @@ function initEaster() {
       const now = Date.now();
       EGG.clicks = now - EGG.lastClick < 900 ? EGG.clicks + 1 : 1;
       EGG.lastClick = now;
-      Sound.squeak();
+      Sound.animal();
       hero.classList.remove('boop'); void hero.offsetWidth; hero.classList.add('boop');
       if (EGG.clicks >= 7) { EGG.clicks = 0; cheeseParty(); }
-      else if (EGG.clicks >= 2) eggPop(EGG_HINTS[(EGG.clicks - 2) % EGG_HINTS.length], e.clientX, e.clientY - 20);
+      else if (EGG.clicks >= 2) eggPop(flavor().egg.hints[(EGG.clicks - 2) % flavor().egg.hints.length], e.clientX, e.clientY - 20);
     });
   }
-  // „piep“ tippen (nur auf der Startseite und nicht in Eingabefeldern)
+  // Tier-Wort tippen (nur auf der Startseite und nicht in Eingabefeldern)
   document.addEventListener('keydown', (e) => {
     if (UI.current !== 'home' || e.target.closest?.('input, textarea, [contenteditable]') || e.key.length !== 1) return;
-    EGG.typed = (EGG.typed + e.key.toLowerCase()).slice(-4);
-    if (EGG.typed === 'piep') { EGG.typed = ''; cheeseParty(); }
+    const word = flavor().egg.word;
+    EGG.typed = (EGG.typed + e.key.toLowerCase()).slice(-word.length);
+    if (EGG.typed === word) { EGG.typed = ''; cheeseParty(); }
   });
   renderEggBadge();
 }
