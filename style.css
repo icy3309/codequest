@@ -222,6 +222,20 @@ pre.code { background: var(--code-bg); border: 1.5px solid var(--line); border-r
 .test.fail { border-color: #f6b7c8; background: var(--bad-bg); }
 .test pre { margin: 4px 0 0; font-size: 12.5px; white-space: pre-wrap; background: var(--surface); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); }
 .test .cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.test.nearmiss { border-color: var(--cheese); background: #fffbe8; }
+.test mark { background: #ffd6e6; color: inherit; border-radius: 3px; outline: 1px solid var(--soft); }
+.diff-why { font-size: 13.5px; margin: 4px 0 2px; }
+.near { font-size: 13.5px; margin: 4px 0; color: #9a6b00; }
+/* „So soll es aussehen“ */
+.expected { margin-top: 10px; padding: 10px 12px; border-radius: 14px; background: var(--surface); border: 1.5px dashed var(--soft); }
+.expected summary { cursor: pointer; font-weight: 700; color: var(--accent-d); }
+.exp-case { margin-top: 8px; }
+.exp-case + .exp-case { border-top: 1.5px dashed var(--line); padding-top: 8px; }
+.exp-label { font-weight: 600; font-size: 13px; }
+.exp-in, .exp-what { font-size: 13.5px; margin: 2px 0; }
+.exp-out { margin: 4px 0 0; padding: 8px 10px; background: var(--code-bg); border: 1.5px solid var(--line); border-radius: 10px; font-size: 13px; white-space: pre-wrap; }
+.exp-list { margin: 4px 0 0; padding-left: 18px; font-size: 13.5px; }
+.exp-note { margin-top: 8px; }
 .help-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
 .hints { display: grid; gap: 6px; margin-top: 10px; }
 .hint { padding: 10px 14px; border-radius: 14px; background: #fffbe8; border: 1.5px solid var(--cheese); }
