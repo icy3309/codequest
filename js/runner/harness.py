@@ -31,18 +31,24 @@ def _error_info(exc, code_lines):
     return {"type": type(exc).__name__, "msg": msg, "line": line, "src": src}
 
 
-def run_program(code, inputs=None, seed=0):
-    """Programm ausführen. Gibt (namespace, stdout, error) zurück."""
+def run_program(code, inputs=None, seed=0, interactive=False):
+    """Programm ausführen. Gibt (namespace, stdout, error) zurück.
+    interactive=True: wie im Terminal – der Fragetext von input() und die
+    eingegebene Antwort erscheinen in der Ausgabe (für ▶ Ausführen)."""
     inputs = list(inputs or [])
     out = _Out()
     ns = {"__name__": "__main__"}
     used = []
 
     def fake_input(prompt=""):
+        if interactive:
+            out.write(str(prompt))
         if not inputs:
             raise InputExhausted("Dein Programm wartet auf mehr Eingaben, als der Test liefert.")
         v = str(inputs.pop(0))
         used.append(v)
+        if interactive:
+            out.write(v + "\n")
         return v
 
     old_out, old_input = sys.stdout, builtins.input
@@ -179,9 +185,11 @@ def run_tests(code, tests):
     return results
 
 
-def api_run(code, inputs_json):
-    _, out, err = run_program(code, json.loads(inputs_json))
-    return json.dumps({"out": out, "error": err})
+def api_run(code, inputs_json, interactive=False):
+    _, out, err = run_program(code, json.loads(inputs_json), interactive=bool(interactive))
+    # Wartet das Programm auf eine Eingabe, ist das im Terminal-Modus kein Fehler
+    waiting = bool(interactive and err and err["type"] == "InputExhausted")
+    return json.dumps({"out": out, "error": None if waiting else err, "waiting": waiting})
 
 
 def api_test(code, tests_json):

@@ -1,8 +1,9 @@
 'use strict';
 /* =========================================================
    Kleiner Code-Editor: Textarea über einem eingefärbten <pre>.
-   Tab = 4 Leerzeichen, Shift+Tab rückt aus, Enter übernimmt die
-   Einrückung (+4 nach ":"), Strg/Cmd+Enter = Ausführen.
+   Bewusst OHNE automatisches Einrücken oder Klammern-Ergänzen:
+   Doppelpunkt und Einrückung sollen selbst gelernt werden.
+   Tab = 4 Leerzeichen, Shift+Tab rückt aus, Strg/Cmd+Enter = Ausführen.
    ========================================================= */
 class CodeEditor {
   constructor(host, { onRun, onCheck, onChange } = {}) {
@@ -50,30 +51,6 @@ class CodeEditor {
       const changed = lines.map((l) => (e.shiftKey ? l.replace(/^ {1,4}/, '') : '    ' + l)).join('\n');
       this.replace(ls, blockEnd, changed, ls, ls + changed.length);
       return;
-    }
-    if (e.key === 'Enter' && !e.shiftKey && !e.altKey) {
-      e.preventDefault();
-      const ls = v.lastIndexOf('\n', s - 1) + 1;
-      const line = v.slice(ls, s);
-      let ind = line.match(/^\s*/)[0];
-      if (/:\s*(#.*)?$/.test(line)) ind += '    ';
-      this.replace(s, end, '\n' + ind);
-      return;
-    }
-    if (e.key === 'Backspace' && s === end && s > 0) {
-      const ls = v.lastIndexOf('\n', s - 1) + 1;
-      const before = v.slice(ls, s);
-      if (before.length && /^ +$/.test(before)) {
-        e.preventDefault();
-        const cut = before.length % 4 || 4;
-        this.replace(s - cut, s, '');
-      }
-      return;
-    }
-    const pairs = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
-    if (pairs[e.key] && s !== end) { // markierten Text einklammern
-      e.preventDefault();
-      this.replace(s, end, e.key + v.slice(s, end) + pairs[e.key], s + 1, end + 1);
     }
   }
 }

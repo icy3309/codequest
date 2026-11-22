@@ -1,7 +1,7 @@
 'use strict';
 /* =========================================================
    Code-Ausführung. Einheitliche Schnittstelle je Sprache:
-     Runner.run(lang, code, inputs) → { out, error }
+     Runner.run(lang, code, inputs, {interactive}) → { out, error, waiting }
      Runner.test(lang, code, tests) → [ { ok, … } ]
    Python läuft per Pyodide in einem Web Worker. Hängt der Code
    (Endlosschleife), wird der Worker beendet und neu gestartet.
@@ -17,7 +17,7 @@ const PyRunner = {
   boot() {
     if (this.ready) return this.ready;
     this.setStatus('loading');
-    this.worker = new Worker('js/runner/python-worker.js?v=2');
+    this.worker = new Worker('js/runner/python-worker.js?v=3');
     this.ready = new Promise((res, rej) => {
       this.worker.onmessage = ({ data }) => {
         if (data.type === 'ready') { this.setStatus('ready'); res(); }
@@ -55,7 +55,7 @@ const PyRunner = {
       this.worker.postMessage({ ...msg, id });
     });
   },
-  run(code, inputs) { return this.call({ cmd: 'run', code, inputs }); },
+  run(code, inputs, opts = {}) { return this.call({ cmd: 'run', code, inputs, interactive: Boolean(opts.interactive) }); },
   test(code, tests) { return this.call({ cmd: 'test', code, tests }); },
 };
 
@@ -64,7 +64,7 @@ const Runner = {
     if (lang === 'python') return PyRunner;
     throw new Error(`Für ${lang} gibt es noch keinen Runner.`);
   },
-  run(lang, code, inputs = []) { return this.for(lang).run(code, inputs); },
+  run(lang, code, inputs = [], opts = {}) { return this.for(lang).run(code, inputs, opts); },
   test(lang, code, tests) { return this.for(lang).test(code, tests); },
 };
 

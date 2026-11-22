@@ -75,12 +75,11 @@ function renderLevel() {
   if (!LV.editor) {
     LV.editor = new CodeEditor($('#editor'), {
       onRun: runCode, onCheck: checkCode,
-      onChange: (v) => { save.drafts[LV.level.id] = v; persistDraftSoon(); toggleInputBox(); },
+      onChange: (v) => { save.drafts[LV.level.id] = v; persistDraftSoon(); },
     });
   }
   LV.editor.value = save.drafts[lv.id] ?? lv.starter ?? '';
-  toggleInputBox();
-  $('#runInputs').value = '';
+  LV.session = null;
   consoleShow('<span class="muted">Ausgabe erscheint hier. Tipp: <kbd>Strg</kbd>+<kbd>Enter</kbd> führt aus, <kbd>Strg</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> prüft.</span>');
   $('#results').innerHTML = '';
   $('#hints').innerHTML = '';
@@ -124,7 +123,6 @@ function expectedHtml(tests, hidden = false) {
 
 let draftTimer = 0;
 function persistDraftSoon() { clearTimeout(draftTimer); draftTimer = setTimeout(persist, 600); }
-function toggleInputBox() { $('#runInputBox').hidden = !/\binput\s*\(/.test(LV.editor?.value || ''); }
 function consoleShow(html) { $('#console').innerHTML = html; }
 function updateHelpButtons() {
   const hs = activeHints(LV.level);
@@ -133,25 +131,80 @@ function updateHelpButtons() {
 }
 
 /* ---------- Ausführen ---------- */
+/* ---------- Ausführen – wie in einem echten Terminal ----------
+   Fragt das Programm mit input() nach etwas, erscheint die Frage unten
+   in der Konsole mit einem Eingabefeld. Nach Enter läuft es weiter.
+   (Technisch: Das Programm wird mit allen bisherigen Antworten neu
+   gestartet – Ausgaben sind gleich, also wirkt es wie ein Weiterlaufen.) */
 async function runCode() {
   if (LV.busy) return;
-  LV.busy = true; setBusy(true);
-  const inputs = $('#runInputs').value ? $('#runInputs').value.split('\n') : [];
+  LV.session = { id: (LV.session?.id || 0) + 1, inputs: [] };
   Mascot.react('fix', Mascot.line('run'), 1400);
   consoleShow(PyRunner.status === 'ready' ? '<span class="info">▶ läuft …</span>' : '<span class="info"><span class="spin">⏳</span> Python wird geladen (nur beim ersten Mal, ca. 5–10 s) …</span>');
+  await runSession(LV.session);
+}
+
+async function runSession(ses) {
+  LV.busy = true; setBusy(true);
   try {
-    const r = await Runner.run(LV.lang, LV.editor.value, inputs);
-    let html = r.out ? esc(r.out) : (r.error ? '' : '<span class="muted">(keine Ausgabe)</span>');
-    if (r.error?.type === 'InputExhausted') html += `<div class="err-box">⌨️ Dein Programm fragt mit <code>input()</code> nach einer Eingabe. Trag sie oben im Feld <b>„Eingaben“</b> ein (eine pro Zeile) und führe erneut aus.</div>`;
-    else if (r.error) html += explainError(r.error);
-    if (r.error && r.error.type !== 'InputExhausted') Mascot.react('sad', r.error.line ? `Huch! Schau mal in Zeile ${r.error.line} 🔍` : Mascot.line('error'), 2200);
-    else if (r.error) Mascot.say('Ich warte auf deine Eingabe ⌨️ – trag sie unten ein!');
-    consoleShow(html);
-    const firstOut = (r.out || '').trim().split('\n').slice(0, 3).join(' ⏎ ').slice(0, 120);
-    logAttempt('run', { summary: r.error ? `${r.error.type}: ${r.error.msg}${r.error.line ? ` (Zeile ${r.error.line})` : ''}` : `lief ohne Fehler${inputs.length ? ` (Eingaben: ${JSON.stringify(inputs)})` : ''}${firstOut ? `, Ausgabe: ${firstOut}` : ', keine Ausgabe'}` });
+    const r = await Runner.run(LV.lang, LV.editor.value, ses.inputs, { interactive: true });
+    if (ses !== LV.session) return; // inzwischen neu gestartet oder abgebrochen
+    if (r.waiting) { renderTerminal(r.out, 'waiting'); return; }
+    renderTerminal(r.out, r.error ? 'error' : 'done', r.error);
+    LV.session = null;
+    if (r.error) Mascot.react('sad', r.error.line ? `Huch! Schau mal in Zeile ${r.error.line} 🔍` : Mascot.line('error'), 2200);
+    const firstOut = (r.out || '').trim().split('\n').slice(-3).join(' ⏎ ').slice(0, 160);
+    logAttempt('run', { summary: r.error ? `${r.error.type}: ${r.error.msg}${r.error.line ? ` (Zeile ${r.error.line})` : ''}` : `lief ohne Fehler${ses.inputs.length ? ` (Eingaben: ${JSON.stringify(ses.inputs)})` : ''}${firstOut ? `, Ausgabe: ${firstOut}` : ', keine Ausgabe'}` });
     questEvent('run');
-  } catch (e) { consoleShow(runFailText(e)); mascotFail(e); logAttempt('run', { summary: e.timeout ? 'nach 6 Sekunden abgebrochen (Endlosschleife?)' : e.message }); }
-  LV.busy = false; setBusy(false);
+  } catch (e) {
+    if (ses === LV.session) {
+      LV.session = null;
+      consoleShow(runFailText(e)); mascotFail(e);
+      logAttempt('run', { summary: e.timeout ? 'nach 6 Sekunden abgebrochen (Endlosschleife?)' : e.message });
+    }
+  } finally {
+    LV.busy = false; setBusy(false);
+  }
+}
+
+/** Konsole zeichnen. state: 'waiting' (Eingabefeld), 'done', 'error'. */
+function renderTerminal(out, state, error) {
+  const box = $('#console');
+  let html = `<span class="term-out">${esc(out)}</span>`;
+  if (state === 'waiting') html += '<input class="stdin" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Eingabe für dein Programm"><div class="term-hint">⌨️ Dein Programm wartet auf eine Eingabe – tippen und <kbd>Enter</kbd> drücken (<kbd>Esc</kbd> bricht ab).</div>';
+  else if (state === 'error') html += explainError(error) + '<div class="term-end err">✖ Programm mit Fehler beendet</div>';
+  else html += `${out ? '' : '<span class="muted">(keine Ausgabe)</span>'}<div class="term-end">✔ Programm beendet</div>`;
+  box.innerHTML = html;
+  box.scrollTop = box.scrollHeight;
+  if (state !== 'waiting') return;
+  const inp = $('.stdin', box);
+  Mascot.say('Ich warte auf deine Eingabe ⌨️');
+  setTimeout(() => { inp.focus({ preventScroll: true }); box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30);
+  inp.addEventListener('keydown', (e) => {
+    const ses = LV.session;
+    if (!ses) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (LV.busy) return;
+      const v = inp.value;
+      ses.inputs.push(v);
+      // Antwort sofort „einfrieren“, dann weiterlaufen lassen
+      inp.replaceWith(Object.assign(document.createElement('span'), { className: 'stdin-echo', textContent: v + '\n' }));
+      $('.term-hint', box)?.remove();
+      runSession(ses);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      stopSession('⏹ Abgebrochen');
+    }
+  });
+}
+function stopSession(msg) {
+  if (!LV.session) return;
+  LV.session = null;
+  const box = $('#console'), inp = $('.stdin', box);
+  if (inp) { inp.disabled = true; inp.replaceWith(document.createElement('span')); }
+  $('.term-hint', box)?.remove();
+  box.insertAdjacentHTML('beforeend', `<div class="term-end">${esc(msg)}</div>`);
 }
 function mascotFail(e) { Mascot.react(e.timeout ? 'dizzy' : 'sad', e.timeout ? Mascot.line('dizzy') : Mascot.line('error'), 2600); }
 function runFailText(e) {
@@ -163,6 +216,7 @@ function setBusy(b) { ['#btnRun', '#btnCheck'].forEach((s) => ($(s).disabled = b
 /* ---------- Prüfen ---------- */
 async function checkCode() {
   if (LV.busy) return;
+  stopSession('⏹ Beendet – es wird jetzt geprüft');
   const lv = LV.level;
   LV.busy = true; setBusy(true);
   const { visible, hidden } = activeTests(lv);
@@ -352,6 +406,6 @@ function initLevels() {
   $('#btnReset').onclick = () => {
     if (!confirm('Deinen Code durch den Startcode ersetzen?')) return;
     LV.editor.value = LV.level.starter || '';
-    delete save.drafts[LV.level.id]; persist(); toggleInputBox();
+    delete save.drafts[LV.level.id]; persist();
   };
 }

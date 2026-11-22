@@ -201,7 +201,7 @@ print(summe)`,
         {
           title: 'Echter Zufall',
           task: [
-            "Jetzt wird's ein echtes Spiel: Ersetze `geheim = 50` durch eine Zufallszahl zwischen 1 und 100. Teste es mit ▶ Ausführen (Tipps unten im Eingabefeld, einer pro Zeile)!",
+            "Jetzt wird's ein echtes Spiel: Ersetze `geheim = 50` durch eine Zufallszahl zwischen 1 und 100. Teste es mit ▶ Ausführen – das Spiel fragt dich unten in der Konsole nach deinen Tipps!",
             "(Beim Prüfen kommt dank eingefrorenem Zufall wieder 50 heraus – darum bleiben alle alten Tests grün.)",
           ],
           tests: [

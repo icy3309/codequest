@@ -52,7 +52,9 @@ body {
 button { font: inherit; color: inherit; cursor: pointer; }
 input, textarea, select { font: inherit; color: inherit; }
 a { color: var(--accent-d); }
-code, kbd, pre { font-family: var(--mono); }
+code, kbd, pre, textarea, .stdin { font-family: var(--mono); }
+/* Keine Ligaturen: >= bleibt >=, != bleibt != – so sieht man, was man wirklich tippt */
+code, kbd, pre, textarea, .editor, .console, .stdin { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0, "dlig" 0; }
 code { background: var(--surface2); color: var(--k); padding: 1px 6px; border-radius: 6px; font-size: .9em; }
 kbd { font-size: .75em; padding: 1px 5px; border-radius: 5px; border: 1px solid var(--line2); background: var(--surface); }
 h1, h2, h3, .logo, .rm-title, .ru-name { font-family: var(--round); }
@@ -190,8 +192,6 @@ pre.code { background: var(--code-bg); border: 1.5px solid var(--line); border-r
 .ed-area textarea::selection { background: rgba(255, 111, 168, .3); color: transparent; }
 .ed-sizer { visibility: hidden; position: static !important; }
 .tk-k { color: var(--k); font-weight: 600; } .tk-s { color: var(--s); } .tk-n { color: var(--n); } .tk-c { color: var(--c); font-style: italic; } .tk-f { color: var(--f); } .tk-b { color: var(--b); }
-.run-input { padding: 8px 12px; border-top: 1.5px solid var(--line); font-size: 13px; background: var(--surface); }
-.run-input textarea { width: 100%; margin-top: 4px; background: var(--code-bg); border: 1.5px solid var(--line); border-radius: 10px; padding: 6px 8px; font-family: var(--mono); font-size: 13px; resize: vertical; }
 
 /* ---------- Maus-Bahn über dem Editor ---------- */
 .mouse-lane {
@@ -212,9 +212,28 @@ pre.code { background: var(--code-bg); border: 1.5px solid var(--line); border-r
 }
 .mouse-bubble.show { opacity: 1; transform: none; }
 
-.console { margin-top: 12px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 14px; font-family: var(--mono); font-size: 13.5px; white-space: pre-wrap; word-break: break-word; min-height: 46px; max-height: 260px; overflow: auto; box-shadow: var(--shadow); }
-.console .err-line { color: var(--bad); }
-.console .info { color: var(--muted); }
+.console {
+  margin-top: 12px; background: #3a2433; color: #ffe9f2; border: 1.5px solid #5a3a4c; border-radius: 14px;
+  padding: 10px 14px; font-family: var(--mono); font-size: 13.5px; white-space: pre-wrap; word-break: break-word;
+  min-height: 64px; max-height: 320px; overflow: auto; box-shadow: var(--shadow);
+}
+.console::before { content: '● ● ●  Terminal'; display: block; font-size: 11px; letter-spacing: 1px; color: #b98aa1; margin: -2px 0 6px; white-space: pre; }
+.console .muted, .console .info { color: #c9a6b8; }
+.console kbd { background: #4d3042; border-color: #6b4a5d; color: #ffe9f2; }
+.console .err-line { color: #ff8fab; }
+.console .err-box { color: var(--text); }
+.console .err-box code { background: var(--surface2); color: var(--k); }
+.console .err-box .muted { color: var(--muted); }
+.console code { background: rgba(255,255,255,.12); color: #ffd1e3; }
+.stdin {
+  font: inherit; color: #ffd966; background: transparent; border: 0; border-bottom: 1.5px dashed #ffb3cf;
+  outline: none; padding: 0 2px; min-width: 60px; width: 40%; max-width: 320px; caret-color: #ffb3cf;
+}
+.stdin:focus { border-bottom-style: solid; background: rgba(255,179,207,.08); }
+.stdin-echo { color: #ffd966; }
+.term-hint { margin-top: 6px; font-family: Inter, system-ui, sans-serif; font-size: 12.5px; color: #c9a6b8; white-space: normal; }
+.term-end { margin-top: 6px; font-size: 12px; color: #9ce5c9; }
+.term-end.err { color: #ff8fab; }
 .err-box { font-family: Inter, sans-serif; background: var(--bad-bg); border: 1.5px solid #f6b7c8; border-radius: 12px; padding: 8px 12px; margin-top: 6px; white-space: normal; }
 .results { margin-top: 12px; display: grid; gap: 6px; }
 .test { display: grid; grid-template-columns: auto 1fr; gap: 10px; padding: 8px 12px; border-radius: 12px; background: var(--surface); border: 1.5px solid var(--line); font-size: 14px; }
