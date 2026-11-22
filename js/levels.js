@@ -38,6 +38,7 @@ function openLevel(id) {
   LV.lang = info.lang.id;
   LV.level = info.level;
   LV.hints = 0; LV.fails = 0; LV.solution = false; LV.results = null; LV.history = [];
+  LV.fresh = false; // erst „Nochmal von vorn“ macht einen Wiederholungsversuch sterne-würdig
   save.lastLevel = id; persist();
   showScreen('level');
   renderLevel();
@@ -85,6 +86,7 @@ function renderLevel() {
   $('#hints').innerHTML = '';
   $('#claudeBox').hidden = true;
   updateHelpButtons();
+  updateFreshButton();
   setTimeout(() => LV.editor.focus(), 60);
 }
 
@@ -350,8 +352,35 @@ function computeStars() {
   if (LV.fails >= 4) s--;
   return Math.max(1, s);
 }
+/** Knopf nur zeigen, wenn das Level schon gelöst ist, aber noch keine 3 Sterne hat. */
+function updateFreshButton() {
+  const st = save.stars[LV.level.id] || 0;
+  $('#btnFresh').hidden = !(st > 0 && st < 3) || LV.fresh;
+}
+/** Level komplett neu beginnen: Startcode, keine Hinweise, keine Fehlversuche – so sind wieder 3 Sterne möglich. */
+function restartFresh() {
+  const lv = LV.level;
+  if (!confirm('Nochmal von vorn?\n\nDein Code wird durch den Startcode ersetzt. Löst du das Level dann ohne Hinweise und mit wenigen Fehlversuchen, bekommst du 3 Sterne (und die fehlenden Punkte).')) return;
+  stopSession('⏹ Neu gestartet');
+  LV.fresh = true;
+  LV.hints = 0; LV.fails = 0; LV.solution = false; LV.results = null; LV.history = [];
+  delete save.drafts[lv.id];
+  if (isProject(lv)) save.projStep[lv.id] = 0; // Projekt wieder ab Schritt 1
+  persist();
+  renderTask();
+  LV.editor.value = lv.starter || '';
+  consoleShow('<span class="muted">Neuer Versuch – viel Erfolg! 🍀</span>');
+  $('#results').innerHTML = ''; $('#hints').innerHTML = ''; $('#claudeBox').hidden = true;
+  updateHelpButtons(); updateFreshButton();
+  Mascot.react('cheer', 'Auf zu 3 Sternen! ⭐⭐⭐', 2200);
+  LV.editor.focus();
+}
+
 function levelSolved() {
-  const lv = LV.level, stars = computeStars(), before = save.stars[lv.id] || 0;
+  const lv = LV.level, before = save.stars[lv.id] || 0;
+  // Schon gelöst und nicht neu gestartet? Dann bleibt es bei den bisherigen Sternen.
+  const replayNoFresh = before > 0 && !LV.fresh;
+  const stars = replayNoFresh ? Math.min(computeStars(), before) : computeStars();
   const gained = stars > before ? levelPoints(lv, stars) - levelPoints(lv, before) : 0;
   if (stars > before) save.stars[lv.id] = stars;
   save.total += gained;
@@ -362,15 +391,18 @@ function levelSolved() {
   refreshHeader();
   checkRankUp();
   $('#lvStars').innerHTML = starsHtml(save.stars[lv.id]);
+  LV.fresh = false; updateFreshButton();
   isProject(lv) ? (confetti(), Sound.win()) : (burst(innerWidth / 2, innerHeight / 3, getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ff6fa8', 50), Sound.animal());
   Mascot.react('cheer', Mascot.line('pass'), 3000);
   const nxt = nextLevel(lv.id);
-  const why = stars < 3 ? `<br><span class="small">${LV.solution ? 'Lösung angesehen → 1 Stern.' : [LV.hints ? 'Hinweis genutzt (−1 ★)' : '', LV.fails >= 4 ? 'viele Fehlversuche (−1 ★)' : ''].filter(Boolean).join(' · ')}</span>` : '';
+  const freshHint = replayNoFresh && before < 3 ? '<br><span class="small">Für mehr Sterne: „🔄 Nochmal von vorn (für 3 ⭐)“ – dann zählt ein neuer Versuch.</span>' : '';
+  const why = replayNoFresh ? '' : stars < 3 ? `<br><span class="small">${LV.solution ? 'Lösung angesehen → 1 Stern.' : [LV.hints ? 'Hinweis genutzt (−1 ★)' : '', LV.fails >= 4 ? 'viele Fehlversuche (−1 ★)' : ''].filter(Boolean).join(' · ')}</span>` : '';
   showDone({
     stars,
     head: isProject(lv) ? '🎉 Projekt abgeschlossen!' : stars === 3 ? 'Perfekt gelöst!' : 'Geschafft!',
-    text: `${gained ? `+${fmt(gained)} Punkte` : before >= stars ? 'Schon mit so vielen Sternen gelöst – keine neuen Punkte.' : ''}${why}`,
+    text: `${gained ? `+${fmt(gained)} Punkte` : before >= stars ? 'Schon mit so vielen Sternen gelöst – keine neuen Punkte.' : ''}${why}${freshHint}`,
     actions: [
+      ...(save.stars[lv.id] < 3 ? [{ label: '🔄 Nochmal von vorn', onClick: () => restartFresh() }] : []),
       { label: '🤖 KI-Feedback kopieren', onClick: () => copyAiPrompt() },
       { label: 'Zur Karte', onClick: () => showScreen('map') },
       nxt ? { label: (nxt.kind === 'project' ? 'Zum Projekt' : 'Nächstes Level') + ' →', primary: true, onClick: () => openLevel(nxt.id) }
@@ -403,6 +435,7 @@ function initLevels() {
   $('#btnHint').onclick = showHint;
   $('#btnSolution').onclick = showSolution;
   $('#btnClaude').onclick = () => copyAiPrompt();
+  $('#btnFresh').onclick = restartFresh;
   $('#btnReset').onclick = () => {
     if (!confirm('Deinen Code durch den Startcode ersetzen?')) return;
     LV.editor.value = LV.level.starter || '';

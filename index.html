@@ -9,7 +9,7 @@
   <title>Mausequest – Programmieren lernen</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐭</text></svg>">
   <script src="js/theme-init.js?v=2"></script>
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
   <canvas id="fx"></canvas>
@@ -102,6 +102,7 @@
           <div class="console" id="console"><span class="muted">Ausgabe erscheint hier. Tipp: <kbd>Strg</kbd>+<kbd>Enter</kbd> führt aus.</span></div>
           <div class="results" id="results"></div>
           <div class="help-row">
+            <button class="ghost sm fresh-btn" id="btnFresh" hidden title="Code zurücksetzen und das Level neu lösen – nur so gibt es beim Wiederholen mehr Sterne">🔄 Nochmal von vorn (für 3 ⭐)</button>
             <button class="ghost sm" id="btnHint">💡 Hinweis</button>
             <button class="ghost sm" id="btnClaude" title="Kopiert einen fertigen Text für ChatGPT, Claude &amp; Co. in die Zwischenablage">🤖 KI-Feedback kopieren</button>
             <button class="ghost sm" id="btnSolution">👀 Lösung zeigen</button>
@@ -261,7 +262,7 @@
   <script src="js/mascot.js?v=10"></script>
   <script src="js/music.js?v=2"></script>
   <script src="js/easter.js?v=4"></script>
-  <script src="js/levels.js?v=13"></script>
+  <script src="js/levels.js?v=14"></script>
   <script src="js/legal.js?v=10"></script>
   <script src="js/main.js?v=6"></script>
 </body>
