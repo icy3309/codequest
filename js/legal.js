@@ -10,7 +10,7 @@ function legalHtml(kind) {
   return `<h3>Datenschutz</h3>
     <p><b>Ohne Anmeldung</b> bleibt alles in deinem Browser (localStorage): Fortschritt, Code-Entwürfe, Einstellungen. Python läuft komplett lokal in deinem Browser (Pyodide, geladen von jsDelivr).</p>
     <p><b>Mit Anmeldung</b> speichern wir bei Supabase (EU-Region empfohlen): E-Mail-Adresse, Spielername, Punkte, gelöste Level, Freundschaften, Rätsel-Lösungen und deinen Fortschritt. Andere Spieler sehen nur Spielername, Rang, Punkte und – während du online bist – was du gerade lernst.</p>
-    <p><b>Claude-Feedback</b>: Wenn du auf „Feedback von Claude“ klickst, werden Aufgabe, dein Code und die Testergebnisse über Supabase an Anthropic (Claude API) geschickt, um eine Antwort zu erzeugen. Dein Name oder deine E-Mail werden dabei nicht mitgeschickt.</p>
+    <p><b>KI-Feedback</b>: Der Knopf „KI-Feedback kopieren“ legt nur einen Text (Aufgabe, dein Code, Testergebnisse, bisherige Versuche) in deine Zwischenablage. Die App schickt dabei nichts an eine KI – du entscheidest selbst, ob und wo du ihn einfügst. Dein Name oder deine E-Mail stehen nicht im Text.</p>
     <p>Du kannst deinen Account samt aller Online-Daten jederzeit im Profil löschen.</p>
     <p>Verantwortlich: ${esc(o.name) || missing}${o.email ? `, ${esc(o.email)}` : ''}</p>`;
 }

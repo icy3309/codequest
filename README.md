@@ -2,7 +2,7 @@
 
 (Maus-Version von Codequest – das Original liegt als Backup in `../CodingLearning-Backup`.)
 
-Eine kleine Lern-App im Browser: kurze Erklärung → Befehlsliste mit Beispiel → Aufgabe → automatische Prüfung → Feedback (auch von Claude). Nach jedem Themenbereich gibt es ein Projekt. Dazu: Punkte, Ränge, Tagesaufgaben, ein Wochenrätsel mit 3 Stufen, Freundesliste mit Online-Status und Ranglisten.
+Eine kleine Lern-App im Browser: kurze Erklärung → Befehlsliste mit Beispiel → Aufgabe → automatische Prüfung → Feedback, auch per KI: Der Knopf „KI-Feedback kopieren“ legt einen fertigen Prompt (Aufgabe, Code, Testergebnisse, bisherige Versuche) in die Zwischenablage – zum Einfügen in Claude, ChatGPT & Co. Nach jedem Themenbereich gibt es ein Projekt. Dazu: Punkte, Ränge, Tagesaufgaben, ein Wochenrätsel mit 3 Stufen, Freundesliste mit Online-Status und Ranglisten.
 
 **Inhalt bisher:** Python mit 10 Themen × (4 Level + 1 Projekt) = 50 Aufgaben. JavaScript, SQL, HTML/CSS und Java sind vorbereitet („bald“).
 
@@ -19,16 +19,13 @@ Dann <http://localhost:8000> öffnen. Ohne weitere Einrichtung läuft alles **of
 
 `http://localhost:8000/verify.html` prüft alle Musterlösungen gegen ihre Tests – nach Änderungen an Inhalten aufrufen.
 
-## Online-Teil einrichten (Freunde, Rangliste, Claude-Feedback)
+## Online-Teil einrichten (Freunde, Rangliste, Wochen-Wertung)
 
 1. **Supabase-Projekt anlegen** auf <https://supabase.com> (neues, eigenes Projekt; Region am besten EU).
 2. **SQL ausführen:** Im Dashboard → *SQL Editor* nacheinander `supabase/schema.sql`, `supabase/update-1-security.sql`, den geheimen Pepper (Zeile `insert into public.app_secrets …` mit dem Wert aus `.puzzle-generator/pepper.txt`) und `supabase/puzzles.sql` ausführen.
 3. **Zugangsdaten eintragen:** *Project Settings → API* → `Project URL` und den `anon`/`publishable` Key in `js/config.js` eintragen. (Beide sind öffentlich – geschützt wird alles per Row-Level-Security.)
 4. **Login-Weiterleitung:** *Authentication → URL Configuration* → `Site URL` = `http://localhost:8000` (bzw. später die echte Adresse) und dieselbe Adresse unter *Redirect URLs* eintragen.
-5. **Claude-Feedback (Edge Function):**
-   - *Edge Functions → Deploy a new function → Via Editor*, Name **`review`**, Inhalt von `supabase/functions/review/index.ts` einfügen, deployen.
-   - *Edge Functions → Secrets*: `ANTHROPIC_API_KEY` mit deinem Key aus der [Claude Console](https://console.anthropic.com) anlegen.
-   - Limit: 20 Feedbacks pro Person und Tag (änderbar in `bump_ai_usage()` in `schema.sql`). Modell: `claude-opus-5-5` mit niedrigem Aufwand (`effort: low`) – kurz und günstig.
+5. *(Optional, wird von der App nicht mehr genutzt)* Die Edge Function `supabase/functions/review` war für direktes Claude-Feedback gedacht. Seit dem Knopf „KI-Feedback kopieren“ braucht es sie und einen API-Key nicht mehr.
 
 Hinweis: Supabase verschickt ohne eigenen Mailserver nur wenige Login-Mails pro Stunde. Nach dem ersten Login kann man im Profil ein Passwort festlegen.
 
@@ -51,7 +48,7 @@ Der Ordner ist eine statische Webseite – z. B. über **GitHub Pages** veröffe
 | Ränge | `js/ranks.js` |
 | Tagesaufgaben | `js/quests.js` |
 | Wochenrätsel | `js/puzzle.js`, `js/puzzles-data.js`, `supabase/puzzles.sql` |
-| Claude-Feedback | `js/feedback.js`, `supabase/functions/review/index.ts` |
+| KI-Feedback (Prompt kopieren) | `js/feedback.js` |
 | Datenbank | `supabase/schema.sql` |
 
 **Punkte:** Level 30 / Projekt 100 pro Stern (3 Sterne; −1 für Hinweise, −1 für 4+ Fehlversuche, Lösung angesehen = 1 Stern). Tagesaufgaben 20–100. Wochenrätsel 100/200/400 + Bonus für die ersten drei. Online rechnet der **Server** die Punkte aus (`record_levels`, `claim_quest`, `submit_puzzle`); Rätselantworten prüft nur der Server.

@@ -50,7 +50,7 @@ function initAuthForms() {
 function renderGate(gate, openModals = false) {
   const show = (html) => { gate.hidden = false; gate.innerHTML = html; return false; };
   if (!SUPABASE_CONFIGURED) return show(`<div class="gate-icon">🛠</div><h3>Online-Teil noch nicht eingerichtet</h3>
-    <p class="muted">Lernen klappt auch offline. Für Freunde, Rangliste und Claude-Feedback: Supabase-Daten in <code>js/config.js</code> eintragen – Anleitung in der <code>README.md</code>.</p>`);
+    <p class="muted">Lernen klappt auch offline. Für Freunde und Rangliste: Supabase-Daten in <code>js/config.js</code> eintragen – Anleitung in der <code>README.md</code>.</p>`);
   if (NET.error) return show(`<div class="gate-icon">📡</div><h3>Keine Verbindung</h3><p class="muted">${esc(NET.error)}</p>`);
   if (!NET.ready) return show('<div class="gate-icon spin">⏳</div><h3>Verbinde …</h3>');
   if (!NET.user) {

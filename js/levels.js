@@ -3,7 +3,7 @@
    Level-Karte und Level-Ansicht (Lerntext, Aufgabe, Editor,
    Tests, Hinweise, Sterne). Projekte haben mehrere Teilschritte.
    ========================================================= */
-const LV = { lang: 'python', level: null, editor: null, hints: 0, fails: 0, solution: false, results: null, busy: false };
+const LV = { history: [], lang: 'python', level: null, editor: null, hints: 0, fails: 0, solution: false, results: null, busy: false };
 
 /* ---------- Karte ---------- */
 function openMap(langId) {
@@ -37,7 +37,7 @@ function openLevel(id) {
   if (!info || !isUnlocked(id)) return;
   LV.lang = info.lang.id;
   LV.level = info.level;
-  LV.hints = 0; LV.fails = 0; LV.solution = false; LV.results = null;
+  LV.hints = 0; LV.fails = 0; LV.solution = false; LV.results = null; LV.history = [];
   save.lastLevel = id; persist();
   showScreen('level');
   renderLevel();
@@ -123,8 +123,10 @@ async function runCode() {
     if (r.error && r.error.type !== 'InputExhausted') Mascot.react('sad', r.error.line ? `Huch! Schau mal in Zeile ${r.error.line} 🔍` : Mascot.line('error'), 2200);
     else if (r.error) Mascot.say('Ich warte auf deine Eingabe ⌨️ – trag sie unten ein!');
     consoleShow(html);
+    const firstOut = (r.out || '').trim().split('\n').slice(0, 3).join(' ⏎ ').slice(0, 120);
+    logAttempt('run', { summary: r.error ? `${r.error.type}: ${r.error.msg}${r.error.line ? ` (Zeile ${r.error.line})` : ''}` : `lief ohne Fehler${inputs.length ? ` (Eingaben: ${JSON.stringify(inputs)})` : ''}${firstOut ? `, Ausgabe: ${firstOut}` : ', keine Ausgabe'}` });
     questEvent('run');
-  } catch (e) { consoleShow(runFailText(e)); mascotFail(e); }
+  } catch (e) { consoleShow(runFailText(e)); mascotFail(e); logAttempt('run', { summary: e.timeout ? 'nach 6 Sekunden abgebrochen (Endlosschleife?)' : e.message }); }
   LV.busy = false; setBusy(false);
 }
 function mascotFail(e) { Mascot.react(e.timeout ? 'dizzy' : 'sad', e.timeout ? Mascot.line('dizzy') : Mascot.line('error'), 2600); }
@@ -143,12 +145,13 @@ async function checkCode() {
   $('#results').innerHTML = `<div class="muted">${PyRunner.status === 'ready' ? '🧪 Prüfe …' : '<span class="spin">⏳</span> Python wird geladen …'}</div>`;
   let res;
   try { res = await Runner.test(LV.lang, LV.editor.value, [...visible, ...hidden]); }
-  catch (e) { $('#results').innerHTML = runFailText(e); mascotFail(e); LV.busy = false; setBusy(false); return; }
+  catch (e) { $('#results').innerHTML = runFailText(e); mascotFail(e); logAttempt('check', { summary: e.timeout ? 'nach 6 Sekunden abgebrochen (Endlosschleife?)' : e.message }); LV.busy = false; setBusy(false); return; }
   LV.busy = false; setBusy(false);
   res.forEach((r, i) => { r.hidden = i >= visible.length; });
   LV.results = res;
   renderResults(res);
   const ok = res.every((r) => r.ok);
+  { const e1 = res.find((r) => r.error)?.error; logAttempt('check', { summary: `${res.filter((r) => r.ok).length} von ${res.length} Tests bestanden${e1 ? ` – ${e1.type}: ${e1.msg}${e1.line ? ` (Zeile ${e1.line})` : ''}` : ''}` }); }
   if (!ok) {
     LV.fails++; Sound.fail();
     const passed = res.filter((r) => r.ok).length, err = res.find((r) => r.error)?.error;
@@ -224,7 +227,7 @@ function levelSolved() {
     head: isProject(lv) ? '🎉 Projekt abgeschlossen!' : stars === 3 ? 'Perfekt gelöst!' : 'Geschafft!',
     text: `${gained ? `+${fmt(gained)} Punkte` : before >= stars ? 'Schon mit so vielen Sternen gelöst – keine neuen Punkte.' : ''}${why}`,
     actions: [
-      { label: 'Feedback von Claude', onClick: () => askClaude() },
+      { label: '🤖 KI-Feedback kopieren', onClick: () => copyAiPrompt() },
       { label: 'Zur Karte', onClick: () => showScreen('map') },
       nxt ? { label: (nxt.kind === 'project' ? 'Zum Projekt' : 'Nächstes Level') + ' →', primary: true, onClick: () => openLevel(nxt.id) }
           : { label: '🏁 Kurs abgeschlossen!', primary: true, onClick: () => showScreen('map') },
@@ -255,7 +258,7 @@ function initLevels() {
   $('#btnCheck').onclick = checkCode;
   $('#btnHint').onclick = showHint;
   $('#btnSolution').onclick = showSolution;
-  $('#btnClaude').onclick = () => askClaude();
+  $('#btnClaude').onclick = () => copyAiPrompt();
   $('#btnReset').onclick = () => {
     if (!confirm('Deinen Code durch den Startcode ersetzen?')) return;
     LV.editor.value = LV.level.starter || '';

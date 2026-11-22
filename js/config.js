@@ -1,7 +1,7 @@
 'use strict';
 /* ---------------------------------------------------------
    Supabase-Zugangsdaten für den Online-Teil (Freunde, Rangliste,
-   Wochenrätsel-Wertung, Claude-Feedback).
+   Wochenrätsel-Wertung).
    Zu finden in Supabase unter: Project Settings → API
    - Project URL               → SUPABASE_URL
    - anon / publishable key    → SUPABASE_ANON_KEY

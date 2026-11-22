@@ -11,7 +11,7 @@ const QUEST_DEFS = [
   { id: 'three1', text: 'Hol 3 Sterne in einem Level', stat: 'three', n: 1, pts: 30 },
   { id: 'three3', text: 'Hol dreimal 3 Sterne', stat: 'three', n: 3, pts: 70 },
   { id: 'run10', text: 'Führe 10-mal Code aus', stat: 'run', n: 10, pts: 20 },
-  { id: 'claude1', text: 'Hol dir Feedback von Claude', stat: 'claude', n: 1, pts: 20 },
+  { id: 'claude1', text: 'Hol dir KI-Feedback', stat: 'claude', n: 1, pts: 20 },
   { id: 'project1', text: 'Schließe ein Projekt ab', stat: 'project', n: 1, pts: 100 },
   { id: 'puzzle1', text: 'Löse eine Stufe des Wochenrätsels', stat: 'puzzle', n: 1, pts: 50 },
 ];
