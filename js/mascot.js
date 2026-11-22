@@ -1,25 +1,24 @@
 'use strict';
 /* =========================================================
-   Pixel-Maus mit Schraubendreher – läuft über dem Editor hin
-   und her, reagiert auf Ausführen/Prüfen und macht Mut.
+   Maskottchen mit Schraubendreher (Pixel-Maus bzw. im dunklen Modus
+   ein dickes Erdhörnchen) – läuft über dem Editor hin und her,
+   reagiert auf Ausführen/Prüfen und macht Mut.
    Sprites sind Zeichen-Raster (24×14), gemalt auf <canvas>.
    ========================================================= */
-const MOUSE_PAL = {
-  K: '#5b3a4a', // Umriss
-  G: '#cfc6db', // Fell (grau-lila)
-  L: '#f5f0f8', // Bauch
-  P: '#ff8fb8', // Ohren innen / Nase
-  E: '#2b1a24', // Auge
-  W: '#ffffff', // Lichtpunkt im Auge
-  C: '#ffb3cf', // Bäckchen
-  T: '#f4a3c0', // Schwanz
-  S: '#ff6fa8', // Griff des Schraubendrehers
-  M: '#a3adbf', // Metall
-  B: '#8fd3ff', // Träne
-  Y: '#ffd966', // Funke / Käse
-};
 const W = 24, H = 14;
-const BASE = [
+const pad = (rows) => rows.map((r) => r.padEnd(W, '.').slice(0, W));
+
+/** Frame bauen: Basis + Beine (letzte Zeile) + einzelne Pixel [zeile, spalte, zeichen]. */
+function buildFrame(base, legs, px) {
+  const g = base.map((r) => r.split(''));
+  g[H - 1] = legs.padEnd(W, '.').split('');
+  for (const [r, c, ch] of px) if (g[r] && c >= 0 && c < W) g[r][c] = ch;
+  return g;
+}
+const BLINK = [[5, 16, 'G'], [5, 17, 'G'], [6, 16, 'K'], [6, 17, 'K']];
+
+/* ---------- 🐭 Maus ---------- */
+const MOUSE_BASE = pad([
   '...........KKK..KKK',
   '..........KPPPKKPPPK',
   '..........KPPPKKPPPK',
@@ -34,43 +33,74 @@ const BASE = [
   '....KGLLLLLGGGGGKK',
   '.....KKKKKKKKKKK',
   '',
-].map((r) => r.padEnd(W, '.').slice(0, W));
-const LEGS_A = '....KK...KK..KK..KK';
-const LEGS_B = '.....KK.KK...KK.KK';
-const LEGS_STAND = '.....KK..KK..KK.KK';
-
-/** Frame bauen: Basis + Beine (letzte Zeile) + einzelne Pixel [zeile, spalte, zeichen]. */
-function buildFrame(legs, px) {
-  const g = BASE.map((r) => r.split(''));
-  g[H - 1] = legs.padEnd(W, '.').split('');
-  for (const [r, c, ch] of px) if (g[r] && c >= 0 && c < W) g[r][c] = ch;
-  return g;
-}
-const DRIVER_HELD = [[10, 19, 'S'], [10, 20, 'S'], [11, 19, 'S'], [11, 20, 'S'], [10, 21, 'M'], [10, 22, 'M'], [10, 23, 'M']];
-const TAIL_A = [[10, 2, 'T'], [11, 1, 'T'], [11, 0, 'T']];
-const TAIL_B = [[10, 2, 'T'], [9, 1, 'T'], [9, 0, 'T']];
-const BLINK = [[5, 16, 'G'], [5, 17, 'G'], [6, 16, 'K'], [6, 17, 'K']];
-const FRAMES = {
-  walk1: buildFrame(LEGS_A, [...TAIL_A, ...DRIVER_HELD]),
-  walk2: buildFrame(LEGS_B, [...TAIL_B, ...DRIVER_HELD]),
-  idle: buildFrame(LEGS_STAND, [...TAIL_A, ...DRIVER_HELD]),
-  blink: buildFrame(LEGS_STAND, [...TAIL_A, ...DRIVER_HELD, ...BLINK]),
-  cheer: buildFrame(LEGS_STAND, [...TAIL_B, [8, 19, 'P'], [3, 21, 'S'], [4, 21, 'S'], [3, 22, 'S'], [4, 22, 'S'], [0, 21, 'M'], [1, 21, 'M'], [2, 21, 'M'], [0, 23, 'Y'], [1, 23, 'Y']]),
-  sad: buildFrame(LEGS_STAND, [...TAIL_B, ...BLINK, [7, 17, 'B'], [8, 17, 'B'], [11, 19, 'S'], [12, 20, 'S'], [13, 21, 'M']]),
-  fix1: buildFrame(LEGS_STAND, [...TAIL_A, [10, 19, 'S'], [10, 20, 'S'], [11, 21, 'M'], [12, 22, 'M']]),
-  fix2: buildFrame(LEGS_STAND, [...TAIL_A, [10, 19, 'S'], [10, 20, 'S'], [11, 21, 'M'], [12, 21, 'M'], [13, 22, 'Y'], [12, 23, 'Y']]),
+]);
+const M_LEGS = { a: '....KK...KK..KK..KK', b: '.....KK.KK...KK.KK', s: '.....KK..KK..KK.KK' };
+const M_DRIVER = [[10, 19, 'S'], [10, 20, 'S'], [11, 19, 'S'], [11, 20, 'S'], [10, 21, 'M'], [10, 22, 'M'], [10, 23, 'M']];
+const M_TAIL_A = [[10, 2, 'T'], [11, 1, 'T'], [11, 0, 'T']];
+const M_TAIL_B = [[10, 2, 'T'], [9, 1, 'T'], [9, 0, 'T']];
+const MOUSE = {
+  pal: { K: '#5b3a4a', G: '#cfc6db', L: '#f5f0f8', P: '#ff8fb8', E: '#2b1a24', W: '#ffffff', C: '#ffb3cf', T: '#f4a3c0', S: '#ff6fa8', M: '#a3adbf', B: '#8fd3ff', Y: '#ffd966' },
+  crown: [0, 1],
+  frames: {
+    walk1: buildFrame(MOUSE_BASE, M_LEGS.a, [...M_TAIL_A, ...M_DRIVER]),
+    walk2: buildFrame(MOUSE_BASE, M_LEGS.b, [...M_TAIL_B, ...M_DRIVER]),
+    idle: buildFrame(MOUSE_BASE, M_LEGS.s, [...M_TAIL_A, ...M_DRIVER]),
+    blink: buildFrame(MOUSE_BASE, M_LEGS.s, [...M_TAIL_A, ...M_DRIVER, ...BLINK]),
+    cheer: buildFrame(MOUSE_BASE, M_LEGS.s, [...M_TAIL_B, [8, 19, 'P'], [3, 21, 'S'], [4, 21, 'S'], [3, 22, 'S'], [4, 22, 'S'], [0, 21, 'M'], [1, 21, 'M'], [2, 21, 'M'], [0, 23, 'Y'], [1, 23, 'Y']]),
+    sad: buildFrame(MOUSE_BASE, M_LEGS.s, [...M_TAIL_B, ...BLINK, [7, 17, 'B'], [8, 17, 'B'], [11, 19, 'S'], [12, 20, 'S'], [13, 21, 'M']]),
+    fix1: buildFrame(MOUSE_BASE, M_LEGS.s, [...M_TAIL_A, [10, 19, 'S'], [10, 20, 'S'], [11, 21, 'M'], [12, 22, 'M']]),
+    fix2: buildFrame(MOUSE_BASE, M_LEGS.s, [...M_TAIL_A, [10, 19, 'S'], [10, 20, 'S'], [11, 21, 'M'], [12, 21, 'M'], [13, 22, 'Y'], [12, 23, 'Y']]),
+  },
 };
 
-/** Frame auf ein Canvas malen (optional gespiegelt). */
+/* ---------- 🐿️ Dickes Erdhörnchen (kleine Öhrchen, Pausbacken, Rückenstreifen, buschiger Schwanz) ---------- */
+const SQ_BASE = pad([
+  '',
+  '',
+  '............KK...KK',
+  '...........KPGK.KGPK',
+  '..........KGGGGGGGGGK',
+  '....KKKKKKGGGGGGEWGGGK',
+  '...KGDGGDGGGGGGGEEGGGGK',
+  '..KGGDGGDGGGGGCCCCGGGGPK',
+  '..KGGDGGDGGGGCCCCCGGGKK',
+  '..KGLLLLLLLGGGCCCGGGK',
+  '..KGLLLLLLLLGGGGGGGK',
+  '...KGLLLLLLLLGGGGKK',
+  '....KKKKKKKKKKKKKK',
+  '',
+]);
+const S_LEGS = { a: '....KK...KK...KK..KK', b: '.....KK.KK....KK.KK', s: '.....KK..KK...KK.KK' };
+const S_DRIVER = [[10, 20, 'S'], [10, 21, 'S'], [11, 20, 'S'], [11, 21, 'S'], [10, 22, 'M'], [10, 23, 'M']];
+const S_TAIL_A = [[3, 1, 'T'], [3, 2, 'T'], [4, 0, 'T'], [4, 1, 'T'], [4, 2, 'T'], [4, 3, 'T'], [5, 0, 'T'], [5, 1, 'T'], [5, 2, 'T'], [5, 3, 'T'], [6, 0, 'T'], [6, 1, 'T'], [6, 2, 'T'], [7, 0, 'T'], [7, 1, 'T'], [8, 1, 'T'], [4, 1, 'U'], [5, 1, 'U']];
+const S_TAIL_B = [[2, 2, 'T'], [2, 3, 'T'], [3, 1, 'T'], [3, 2, 'T'], [3, 3, 'T'], [4, 0, 'T'], [4, 1, 'T'], [4, 2, 'T'], [4, 3, 'T'], [5, 0, 'T'], [5, 1, 'T'], [5, 2, 'T'], [5, 3, 'T'], [6, 1, 'T'], [6, 2, 'T'], [7, 1, 'T'], [3, 2, 'U'], [4, 1, 'U']];
+const SQUIRREL = {
+  pal: { K: '#2b1c14', G: '#c99560', D: '#8b5a31', L: '#f3dfbf', P: '#e7907e', E: '#1b120c', W: '#ffffff', C: '#e3b47f', T: '#a9743f', U: '#cf9a5d', S: '#f6b94c', M: '#b7c0d6', B: '#8fd3ff', Y: '#ffe38a' },
+  crown: [1, 2],
+  frames: {
+    walk1: buildFrame(SQ_BASE, S_LEGS.a, [...S_TAIL_A, ...S_DRIVER]),
+    walk2: buildFrame(SQ_BASE, S_LEGS.b, [...S_TAIL_B, ...S_DRIVER]),
+    idle: buildFrame(SQ_BASE, S_LEGS.s, [...S_TAIL_A, ...S_DRIVER]),
+    blink: buildFrame(SQ_BASE, S_LEGS.s, [...S_TAIL_A, ...S_DRIVER, ...BLINK]),
+    cheer: buildFrame(SQ_BASE, S_LEGS.s, [...S_TAIL_B, [8, 19, 'P'], [3, 21, 'S'], [4, 21, 'S'], [3, 22, 'S'], [4, 22, 'S'], [0, 21, 'M'], [1, 21, 'M'], [2, 21, 'M'], [0, 23, 'Y'], [1, 23, 'Y']]),
+    sad: buildFrame(SQ_BASE, S_LEGS.s, [...S_TAIL_B, ...BLINK, [7, 18, 'B'], [8, 18, 'B'], [11, 20, 'S'], [12, 21, 'S'], [13, 22, 'M']]),
+    fix1: buildFrame(SQ_BASE, S_LEGS.s, [...S_TAIL_A, [10, 20, 'S'], [10, 21, 'S'], [11, 22, 'M'], [12, 23, 'M']]),
+    fix2: buildFrame(SQ_BASE, S_LEGS.s, [...S_TAIL_A, [10, 20, 'S'], [10, 21, 'S'], [11, 22, 'M'], [12, 22, 'M'], [13, 23, 'Y'], [12, 23, 'Y']]),
+  },
+};
+const isSquirrel = () => document.documentElement.dataset.theme === 'squirrel';
+const currentSprite = () => (isSquirrel() ? SQUIRREL : MOUSE);
+
+/** Frame auf ein Canvas malen (optional gespiegelt). Maus oder Erdhörnchen – je nach Modus. */
 function drawMouse(canvas, frame = 'idle', flip = false) {
   const ctx = canvas.getContext('2d');
   if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
   ctx.clearRect(0, 0, W, H);
-  const g = FRAMES[frame] || FRAMES.idle;
+  const sp = currentSprite(), g = sp.frames[frame] || sp.frames.idle;
   const crown = typeof save !== 'undefined' && save.secretCheese > 0;
   for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
-    const ch = crown && r === 0 && (c === 14 || c === 15) ? 'Y' : crown && r === 1 && (c === 14 || c === 15) ? 'Y' : g[r][c];
-    const col = MOUSE_PAL[ch];
+    const ch = crown && sp.crown.includes(r) && (c === 14 || c === 15) ? 'Y' : g[r][c];
+    const col = sp.pal[ch];
     if (!col) continue;
     ctx.fillStyle = col;
     ctx.fillRect(flip ? W - 1 - c : c, r, 1, 1);

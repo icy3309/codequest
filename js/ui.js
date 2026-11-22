@@ -47,6 +47,17 @@ function initUI() {
     if (open && open.dataset.closable !== 'false') open.classList.remove('show');
   });
   $('#muteBtn').onclick = () => { save.muted = !save.muted; persist(); refreshHeader(); };
+  // 🐭 ⟷ 🐿️ Modus-Schalter
+  const tt = $('#themeToggle');
+  tt.checked = save.theme === 'squirrel';
+  tt.onchange = () => {
+    save.theme = tt.checked ? 'squirrel' : 'mouse';
+    if (tt.checked) document.documentElement.dataset.theme = 'squirrel';
+    else delete document.documentElement.dataset.theme;
+    persist();
+    if (typeof paintStaticMice === 'function') paintStaticMice();
+    if (typeof Mascot !== 'undefined' && Mascot.lane?.offsetParent) Mascot.say(tt.checked ? 'Nachtschicht! 🌙🐿️' : 'Guten Morgen! ☀️🐭');
+  };
   onHeader(() => {
     $('#dayStreak').textContent = currentDayStreak();
     $('#starCount').textContent = totalStars();

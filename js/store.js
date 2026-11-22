@@ -7,7 +7,8 @@ const saveDefaults = () => ({
   projStep: {},     // projektId → Anzahl erledigter Teilschritte
   total: 0,         // Punkte im Offline-Modus
   dayStreak: 0, lastDay: null,
-  muted: false, music: true, rankSeen: null, lastLevel: null,
+  muted: false, music: true, theme: 'mouse', // 'mouse' (hell, rosa) oder 'squirrel' (dunkel, Nachthimmel)
+  rankSeen: null, lastLevel: null,
   secretCheese: 0, // Easter-Egg: wie oft Mimis Käseversteck gefunden wurde
   quests: { day: null, claimed: [], stats: {} },
   puzzle: {},       // "2026-W47" → { 1: true, 3: true }

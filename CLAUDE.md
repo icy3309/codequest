@@ -1,6 +1,6 @@
 # Mausequest
 
-Python-Lern-App im Browser (Level → Aufgabe → automatische Tests), süßer Maus-Look mit Pixel-Maskottchen „Mimi“. Für Jasper und seine Freundin; live unter https://icy3309.github.io/mausequest/ (GitHub Pages, Repo `icy3309/mausequest`). Das Original im Space-Look liegt unverändert in `../CodingLearning-Backup` – nicht anfassen.
+Python-Lern-App im Browser (Level → Aufgabe → automatische Tests), süßer Maus-Look mit Pixel-Maskottchen „Mimi“. Per Schalter 🐭 ⟷ 🐿️ (oben) gibt es einen dunklen Nachthimmel-Modus mit dickem Erdhörnchen statt Maus – sonst identisch. Für Jasper und seine Freundin; live unter https://icy3309.github.io/mausequest/ (GitHub Pages, Repo `icy3309/mausequest`). Das Original im Space-Look liegt unverändert in `../CodingLearning-Backup` – nicht anfassen.
 
 ## Kommunikation
 - Mit Jasper auf **Deutsch** sprechen. Alle Texte in der App sind Deutsch, per Du, freundlich, mausig.
@@ -14,7 +14,8 @@ Python-Lern-App im Browser (Level → Aufgabe → automatische Tests), süßer M
 ## Wichtige Dateien
 - `content/python/t01.js` … `t10.js` – Level als Daten (`addTopic`). Format & Testarten: siehe README „Ein Level hinzufügen“.
 - `js/levels.js` – Level-Ansicht, Terminal (interaktives `input()`), Prüfen, Sterne, „So soll es aussehen“, Fast-Treffer.
-- `js/mascot.js` – Mimi (Pixel-Sprites als Zeichen-Raster), `Mascot.react()`, `HeroMouse` (Startseite).
+- `js/mascot.js` – Maskottchen: Sprite-Sets `MOUSE` und `SQUIRREL` (Zeichen-Raster 24×14, gleiche Frame-Namen), `drawMouse()` wählt nach Modus; `Mascot.react()`, `HeroMouse` (Startseite).
+- Modus: `save.theme` (`mouse`/`squirrel`) → `data-theme="squirrel"` auf `<html>`; `js/theme-init.js` setzt ihn schon im `<head>`.
 - `js/music.js` (Lofi-Song, WebAudio), `js/easter.js` (Käse-Easter-Egg), `js/feedback.js` (KI-Prompt in die Zwischenablage).
 - `js/net.js`, `js/social.js`, `js/ranks.js`, `js/quests.js`, `js/puzzle.js` – Online-Funktionen.
 - `supabase/schema.sql` + `supabase/update-*.sql` – Datenbank. `supabase/functions/review` ist **ungenutzt** (altes Claude-Feedback).
@@ -27,6 +28,7 @@ Python-Lern-App im Browser (Level → Aufgabe → automatische Tests), süßer M
 
 ## Regeln (immer beachten)
 - **Cache-Busting:** Nach jeder Änderung an einer JS-/CSS-Datei deren `?v=`-Nummer in `index.html` erhöhen (Worker: `python-worker.js?v=` in `runner.js`, `harness.py?v=` im Worker). Sonst sehen Nutzer die alte Version.
+- **Farben nur über CSS-Variablen** (`:root` = Maus hell, `:root[data-theme="squirrel"]` = Nachthimmel). Keine festen Farbwerte in Regeln – neue Farbe = neues Token in **beiden** Blöcken. Jede UI-Änderung in beiden Modi ansehen.
 - **Editor bleibt „ehrlich“:** kein Auto-Einrücken, keine Auto-Klammern, keine Schrift-Ligaturen. Doppelpunkt & Einrückung sollen gelernt werden.
 - **Erwartete Ausgabe muss klar sein:** neue Tests so schreiben, dass „So soll es aussehen“ (aus den sichtbaren Tests generiert) eindeutig ist. Versteckte Tests (`hidden`) gegen Hardcoding.
 - Beim Prüfen ist `random` mit Seed 0 eingefroren (`randint(1, 100)` → 50).
