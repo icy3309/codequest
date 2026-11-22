@@ -46,6 +46,7 @@ Python-Lern-App im Browser (Level → Aufgabe → automatische Tests), süßer M
 - Einspielen über das Supabase-Dashboard (SQL-Editor). Vorher Jasper fragen; danach mit einer Abfrage prüfen. Security Advisor im Dashboard checken.
 
 ## Arbeitsweise
+- **Diese Datei aktuell halten:** Nach jeder wichtigen Änderung (neue Datei/Funktion, neue Regel, geänderter Befehl, Sicherheits- oder Datenbank-Änderung, erledigter offener Punkt) die CLAUDE.md selbständig im selben Commit anpassen – kurz und knapp, Veraltetes löschen statt nur ergänzen.
 - Größere Umbauten erst planen (Plan-Modus), kleine Wünsche direkt umsetzen.
 - Nicht zwei Claude-Sessions gleichzeitig in diesem Ordner arbeiten lassen (sonst Git-Worktree nutzen).
 - Nach Änderungen im Browser testen (Konsole ohne Fehler), dann committen und pushen, dann Live-Seite prüfen. Nicht am Fortschritt in Jaspers eingeloggtem Konto herumspielen (keine Level für ihn lösen).
