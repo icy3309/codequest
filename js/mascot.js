@@ -88,15 +88,74 @@ const SQUIRREL = {
     fix2: buildFrame(SQ_BASE, S_LEGS.s, [...S_TAIL_A, [10, 20, 'S'], [10, 21, 'S'], [11, 22, 'M'], [12, 22, 'M'], [13, 23, 'Y'], [12, 23, 'Y']]),
   },
 };
-const isSquirrel = () => document.documentElement.dataset.theme === 'squirrel';
-const currentSprite = () => (isSquirrel() ? SQUIRREL : MOUSE);
+/* ---------- 🍊 Capybara im Seerosenteich (schwimmt, taucht, trägt Orange oder Seerosenblatt) ---------- */
+const CAPY_BASE = pad([
+  '', '', '', '',
+  '.............KK..KK',
+  '............KGGGGGGK',
+  '...........KGGGGGGGGK',
+  '...KKKKKKKKGGGGGEWGGGK',
+  '..K' + 'G'.repeat(19) + 'K',
+  '..K' + 'G'.repeat(18) + 'NK',
+  '..KDDD' + 'G'.repeat(14) + 'DDK',
+  '', '', '',
+]);
+const ripples = (row, cols) => cols.map((c) => [row, c, 'R']);
+const C_RIP_A = [...ripples(11, [1, 2, 5, 6, 7, 8, 12, 13, 14, 15, 16, 19, 20, 21]), [10, 0, 'R'], [10, 23, 'R'], [12, 9, 'R'], [12, 10, 'R']];
+const C_RIP_B = [...ripples(11, [0, 3, 4, 7, 8, 9, 10, 13, 14, 17, 18, 22, 23]), [10, 1, 'R'], [12, 6, 'R'], [12, 16, 'R'], [12, 17, 'R']];
+const C_BLINK = [[7, 16, 'D'], [7, 17, 'D']];
+const C_HATS = {
+  orange: [[0, 15, 'V'], [0, 16, 'Z'], [0, 17, 'Z'], [1, 15, 'O'], [1, 16, 'o'], [2, 14, 'O'], [2, 15, 'o'], [2, 16, 'O'], [2, 17, 'O'],
+    [3, 14, 'O'], [3, 15, 'O'], [3, 16, 'O'], [3, 17, 'O'], [4, 15, 'O'], [4, 16, 'O']],
+  leaf: [...[13, 14, 15, 16, 17, 18].map((c) => [3, c, c % 3 ? 'Z' : 'z']), ...[12, 13, 14, 15, 16, 17, 18, 19].map((c) => [4, c, c === 19 ? 'z' : 'Z']),
+    [1, 15, 'P'], [2, 14, 'P'], [2, 16, 'P'], [2, 15, 'Y']],
+};
+/** Kopf ragt nur heraus: Körper links unter Wasser. */
+const C_PEEK = [...[7, 8, 9, 10].flatMap((r) => [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((c) => [r, c, '.'])), [8, 10, 'K'], [9, 10, 'K'], [10, 10, 'K'],
+  ...ripples(11, [8, 9, 10, 11, 13, 14, 18, 19, 22, 23]), [10, 8, 'R'], [10, 9, 'R']];
+/** Abgetaucht: nur der Rücken und Luftblasen. */
+const C_DIVE = (bubbles) => [
+  ...[4, 5, 6, 7, 8, 9, 10].flatMap((r) => Array.from({ length: W }, (_, c) => [r, c, '.'])),
+  ...[6, 7, 8, 9, 10, 11, 12, 13, 14].map((c) => [10, c, c === 6 || c === 14 ? 'K' : 'G']), ...[7, 8, 9, 10, 11, 12, 13].map((c) => [9, c, 'K']),
+  ...ripples(11, [3, 4, 5, 6, 7, 8, 13, 14, 15, 16, 17]), ...bubbles.map(([r, c]) => [r, c, 'B']),
+];
+const CAPY = {
+  pal: { K: '#4a2e1c', G: '#b47a48', D: '#946036', N: '#2e1c12', E: '#1a120c', W: '#ffffff', O: '#ff8a1f', o: '#ffc46b', Z: '#3fa34d', z: '#6fcf7a', V: '#6b4a2a', P: '#ff8fc4', Y: '#fff3a6', R: '#e6f8ff', B: '#d9f2ff', S: '#ff8a1f', M: '#b7c0d6' },
+  crown: [],
+  hat: 'orange', dove: false,
+  frames: {
+    walk1: buildFrame(CAPY_BASE, '', [...C_RIP_A]),
+    walk2: buildFrame(CAPY_BASE, '', [...C_RIP_B]),
+    idle: buildFrame(CAPY_BASE, '', [...C_RIP_A]),
+    blink: buildFrame(CAPY_BASE, '', [...C_RIP_A, ...C_BLINK]),
+    cheer: buildFrame(CAPY_BASE, '', [...C_RIP_B, [1, 11, 'Y'], [0, 20, 'Y'], [2, 21, 'Y'], [9, 19, 'P']]),
+    sad: buildFrame(CAPY_BASE, '', [...C_RIP_A, ...C_BLINK, [8, 17, 'B'], [9, 17, 'B']]),
+    peek: buildFrame(CAPY_BASE, '', [...C_PEEK]),
+    fix1: buildFrame(CAPY_BASE, '', C_DIVE([[7, 16], [5, 17], [3, 16]])),
+    fix2: buildFrame(CAPY_BASE, '', C_DIVE([[8, 15], [6, 16], [4, 18]])),
+  },
+};
+const themeName = () => document.documentElement.dataset.theme || 'mouse';
+const isSquirrel = () => themeName() === 'squirrel';
+const currentSprite = () => ({ squirrel: SQUIRREL, capy: CAPY }[themeName()] || MOUSE);
 
 /** Frame auf ein Canvas malen (optional gespiegelt). Maus oder Erdhörnchen – je nach Modus. */
 function drawMouse(canvas, frame = 'idle', flip = false) {
   const ctx = canvas.getContext('2d');
   if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
   ctx.clearRect(0, 0, W, H);
-  const sp = currentSprite(), g = sp.frames[frame] || sp.frames.idle;
+  const sp = currentSprite();
+  let g = sp.frames[frame] || sp.frames.idle;
+  if (sp === CAPY) {
+    const diving = frame === 'fix1' || frame === 'fix2';
+    if (diving) CAPY.dove = true;
+    else {
+      // Nach dem Auftauchen trägt es manchmal ein Seerosenblatt statt der Orange
+      if (CAPY.dove) { CAPY.hat = Math.random() < 0.35 ? 'leaf' : 'orange'; CAPY.dove = false; }
+      g = g.map((row) => row.slice());
+      for (const [r, c, ch] of C_HATS[CAPY.hat]) g[r][c] = ch;
+    }
+  }
   const crown = typeof save !== 'undefined' && save.secretCheese > 0;
   for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
     const ch = crown && sp.crown.includes(r) && (c === 14 || c === 15) ? 'Y' : g[r][c];
@@ -196,6 +255,8 @@ const Mascot = {
       jump = Math.abs(Math.sin(this.t * 12)) * 1.5;
     } else if (this.mode === 'idle' || this.mode === 'walk') {
       frame = (this.t % 3.2) < 0.15 ? 'blink' : 'idle';
+      // Capybara: beim Verschnaufen ab und zu abtauchen und nur den Kopf zeigen
+      if (currentSprite() === CAPY && this.mode === 'idle') frame = (this.t % 6) < 1.6 ? (this.t % 6 < 0.8 ? 'fix1' : 'fix2') : (this.t % 6) < 3.4 ? 'peek' : frame;
     } else if (this.mode === 'cheer') {
       frame = 'cheer';
       jump = this.reduce ? 0 : Math.abs(Math.sin(this.t * 9)) * 10;
@@ -307,7 +368,7 @@ const HeroMouse = {
         y = Math.sin(p * Math.PI) * 22;
         break;
       case 'think':
-        frame = p > 0.4 && p < 0.5 ? 'blink' : 'idle';
+        frame = currentSprite() === CAPY ? 'peek' : p > 0.4 && p < 0.5 ? 'blink' : 'idle'; // Capybara streckt nur den Kopf raus
         y = Math.sin(now / 600) * 1.5;
         break;
       case 'sleepy':

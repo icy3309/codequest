@@ -116,6 +116,77 @@
 }
 :root[data-theme="squirrel"] body { background-size: 120px 120px, 170px 170px, 100% 100%; background-repeat: repeat, repeat, no-repeat; }
 
+/* ---------- 🍊 Capybara-Modus: Seerosenteich ---------- */
+:root[data-theme="capy"] {
+  --bg: #6cc3ea;
+  --bg2: #fffdf6;
+  --surface: #fffdf6;
+  --surface2: #eef8f1;
+  --panel: #fffdf6;
+  --panel2: #f3faf4;
+  --line: #cfe6d6;
+  --line2: #b5d8c0;
+  --text: #2f3b2b;
+  --muted: #6c7c66;
+  --accent: #ff8a1f;      /* Orange */
+  --accent-d: #d96c00;
+  --accent2: #3fa34d;     /* Seerosengrün */
+  --soft: #ffcf9c;
+  --good: #2e9a5a;
+  --good-bg: #e7f7ec;
+  --bad: #e2504f;
+  --bad-bg: #fff0ee;
+  --gold: #f5b72a;
+  --gold-d: #c98d0e;
+  --cheese: #ffb347;
+  --mint: #8fe3b5;
+  --code-bg: #f4fbf6;
+  --shadow: 0 6px 18px -8px rgba(20, 70, 90, .45);
+  --shadow-lg: 0 18px 50px -18px rgba(20, 70, 90, .55);
+  --k: #c0392b; --s: #2e8a57; --n: #d96c00; --c: #93a58e; --f: #2f6fb5; --b: #8a4fc4;
+  --on-accent: #ffffff;
+  --star-off: #d9e6dc;
+  --tint: #fff4e3;
+  --tint-accent: #fff1e2;
+  --good-line: #a9dfbd;
+  --bad-line: #f4b6b0;
+  --mark: #ffe0bf;
+  --near-text: #a35b00;
+  --ai-bg: #eef6ff;
+  --ai-line: #bcd6f2;
+  --dot-off: #cfe0d4;
+  --me-row: #fff0dd;
+  --ring: rgba(255, 138, 31, .3);
+  --select: rgba(63, 163, 77, .3);
+  --gutter: #a8c4ad;
+  --topbar: rgba(255, 253, 246, .9);
+  --overlay: rgba(16, 52, 58, .45);
+  --rankup-bg: radial-gradient(circle, rgba(255, 253, 246, .93), rgba(190, 232, 247, .96));
+  --lane-bg: #6cc3ea;
+  --term-bg: #12363d; --term-fg: #e8fbf4; --term-line: #2b5b63; --term-dim: #8fb9b5; --term-err: #ff9a8f; --term-in: #ffb347;
+  --glass: rgba(255, 253, 246, .88);
+}
+:root[data-theme="capy"] body {
+  background: var(--pond, none) 0 0 / 256px 256px repeat, #6cc3ea;
+  image-rendering: pixelated;
+}
+:root[data-theme="capy"] body * { image-rendering: auto; }
+:root[data-theme="capy"] canvas { image-rendering: pixelated; }
+/* Text, der direkt auf dem Wasser stünde, bekommt ein helles „Floß“ */
+:root[data-theme="capy"] .hero > div:first-child,
+:root[data-theme="capy"] .screen-head,
+:root[data-theme="capy"] .screen > h2,
+:root[data-theme="capy"] .topic-head,
+:root[data-theme="capy"] #results > .muted,
+:root[data-theme="capy"] .foot {
+  background: var(--glass); border-radius: 16px; padding: 10px 14px; box-shadow: var(--shadow);
+}
+:root[data-theme="capy"] .screen > h2, :root[data-theme="capy"] .topic-head, :root[data-theme="capy"] .foot { display: inline-flex; }
+:root[data-theme="capy"] .foot { display: block; width: fit-content; margin: 0 auto 16px; }
+:root[data-theme="capy"] .mouse-lane::after { display: none; }
+:root[data-theme="capy"] .hero-stage { filter: drop-shadow(0 3px 0 rgba(20, 70, 90, .25)); }
+:root[data-theme="capy"] .mouse-lane { background: var(--pond, #6cc3ea) 0 0 / 256px 256px; }
+
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; min-height: 100%; }
@@ -170,7 +241,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   backdrop-filter: blur(8px); background: var(--topbar);
 }
 .logo { font-weight: 900; font-size: 23px; letter-spacing: .5px; background: none; border: 0; padding: 0; color: var(--text); display: flex; align-items: center; gap: 8px; }
-.logo span { color: var(--accent); }
+.logo #logoText { color: var(--text); }
+.logo #logoText span { color: var(--accent); }
 .logo canvas { width: 36px; height: 21px; image-rendering: pixelated; }
 .meta { display: flex; gap: 8px; flex-wrap: wrap; }
 .pill { background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 14px; display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow); }
@@ -451,14 +523,12 @@ table.lb .ex { color: var(--muted); font-size: 13px; }
   .editor { font-size: 13px; }
   .hero-mouse { width: 120px; height: 70px; }
 }
-/* ---------- 🐭 ⟷ 🐿️ Schalter ---------- */
-.theme-switch { cursor: pointer; user-select: none; gap: 6px; }
-.theme-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.theme-switch .track { position: relative; width: 38px; height: 20px; border-radius: 99px; background: var(--soft); transition: background .25s; }
-.theme-switch .thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .25s; }
-.theme-switch input:checked + .track { background: var(--accent2); }
-.theme-switch input:checked + .track .thumb { transform: translateX(18px); }
-.theme-switch input:focus-visible + .track { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* ---------- 🐭 / 🐿️ / 🍊 Modus-Schalter (Schieber mit drei Stufen) ---------- */
+.theme-seg { position: relative; gap: 0; padding: 3px; }
+.theme-seg button { position: relative; z-index: 1; background: none; border: 0; width: 30px; height: 24px; border-radius: 99px; font-size: 15px; line-height: 1; padding: 0; opacity: .55; transition: opacity .2s; }
+.theme-seg button.on { opacity: 1; }
+.theme-seg button:focus-visible { outline: 2px solid var(--accent); }
+.theme-thumb { position: absolute; top: 3px; left: 3px; width: 30px; height: 24px; border-radius: 99px; background: var(--soft); transform: translateX(calc(var(--ti, 0) * 30px)); transition: transform .3s cubic-bezier(.3, 1.4, .6, 1); }
 
 /* ---------- Musik-Knopf & Easter-Egg ---------- */
 .pill.off { opacity: .45; text-decoration: line-through; }

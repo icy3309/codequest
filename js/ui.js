@@ -47,17 +47,12 @@ function initUI() {
     if (open && open.dataset.closable !== 'false') open.classList.remove('show');
   });
   $('#muteBtn').onclick = () => { save.muted = !save.muted; persist(); refreshHeader(); };
-  // 🐭 ⟷ 🐿️ Modus-Schalter
-  const tt = $('#themeToggle');
-  tt.checked = save.theme === 'squirrel';
-  tt.onchange = () => {
-    save.theme = tt.checked ? 'squirrel' : 'mouse';
-    if (tt.checked) document.documentElement.dataset.theme = 'squirrel';
-    else delete document.documentElement.dataset.theme;
-    persist();
-    if (typeof paintStaticMice === 'function') paintStaticMice();
-    if (typeof Mascot !== 'undefined' && Mascot.lane?.offsetParent) Mascot.say(tt.checked ? 'Nachtschicht! 🌙🐿️' : 'Guten Morgen! ☀️🐭');
-  };
+  // 🐭 / 🐿️ / 🍊 Modus-Schalter
+  $('#themeSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-theme]');
+    if (b && b.dataset.theme !== save.theme) setTheme(b.dataset.theme, true);
+  });
+  setTheme(save.theme || 'mouse', false);
   onHeader(() => {
     $('#dayStreak').textContent = currentDayStreak();
     $('#starCount').textContent = totalStars();
@@ -65,4 +60,30 @@ function initUI() {
     $('#muteBtn').textContent = save.muted ? '🔇' : '🔊';
     $('#muteBtn').title = save.muted ? 'Soundeffekte an' : 'Soundeffekte aus';
   });
+}
+
+/* ---------- Modi: Farben, Maskottchen, Titel ---------- */
+const THEME_INFO = {
+  mouse: { title: 'Mause Quest', logo: 'MAUSE <span>QUEST</span>', icon: '🐭', hello: 'Guten Morgen! ☀️🐭' },
+  squirrel: { title: 'Gurt Quest', logo: 'GURT <span>QUEST</span>', icon: '🐿️', hello: 'Nachtschicht! 🌙🐿️' },
+  capy: { title: 'CapyQuest', logo: 'CAPY<span>QUEST</span>', icon: '🍊', hello: 'Ab in den Teich! 🍊💦' },
+};
+function setTheme(theme, announce) {
+  if (!THEME_INFO[theme]) theme = 'mouse';
+  save.theme = theme;
+  persist();
+  applyThemeEarly(theme); // data-theme + Teich-Kachel (theme-init.js)
+  const info = THEME_INFO[theme];
+  $('#logoText').innerHTML = info.logo;
+  document.title = `${info.title} – Programmieren lernen`;
+  const fav = document.querySelector('link[rel="icon"]');
+  if (fav) fav.href = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${info.icon}</text></svg>`);
+  $$('#themeSeg button').forEach((b, i) => {
+    const on = b.dataset.theme === theme;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', String(on));
+    if (on) $('#themeSeg').style.setProperty('--ti', i);
+  });
+  if (typeof paintStaticMice === 'function') paintStaticMice();
+  if (announce && typeof Mascot !== 'undefined' && Mascot.lane?.offsetParent) Mascot.say(info.hello);
 }
