@@ -49,6 +49,7 @@
   --ring: rgba(255, 111, 168, .25);
   --select: rgba(255, 111, 168, .3);
   --gutter: #d9a9bd;
+  --guide: #efbdd1;
   --topbar: rgba(255, 246, 249, .85);
   --overlay: rgba(74, 43, 58, .35);
   --rankup-bg: radial-gradient(circle, rgba(255, 240, 246, .92), rgba(255, 214, 230, .96));
@@ -105,6 +106,7 @@
   --ring: rgba(246, 185, 76, .3);
   --select: rgba(143, 180, 255, .35);
   --gutter: #4f5d91;
+  --guide: #3a4a84;
   --topbar: rgba(13, 20, 48, .85);
   --overlay: rgba(4, 7, 20, .6);
   --rankup-bg: radial-gradient(circle, rgba(29, 40, 82, .95), rgba(8, 12, 30, .97));
@@ -159,6 +161,7 @@
   --ring: rgba(255, 138, 31, .3);
   --select: rgba(63, 163, 77, .3);
   --gutter: #a8c4ad;
+  --guide: #b3d3bb;
   --topbar: rgba(255, 253, 246, .9);
   --overlay: rgba(16, 52, 58, .45);
   --rankup-bg: radial-gradient(circle, rgba(255, 253, 246, .93), rgba(190, 232, 247, .96));
@@ -346,6 +349,7 @@ pre.code { background: var(--code-bg); border: 1.5px solid var(--line); border-r
 .ed-area textarea { background: transparent; color: transparent; caret-color: var(--accent-d); resize: none; outline: none; }
 .ed-area textarea::selection { background: var(--select); color: transparent; }
 .ed-sizer { visibility: hidden; position: static !important; }
+.ig { display: inline-block; height: 21px; vertical-align: top; background: linear-gradient(var(--guide), var(--guide)) no-repeat left top / 1px 100%; }
 .tk-k { color: var(--k); font-weight: 600; } .tk-s { color: var(--s); } .tk-n { color: var(--n); } .tk-c { color: var(--c); font-style: italic; } .tk-f { color: var(--f); } .tk-b { color: var(--b); }
 
 /* ---------- Maus-Bahn über dem Editor ---------- */

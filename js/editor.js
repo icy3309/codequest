@@ -5,12 +5,27 @@
    Doppelpunkt und Einrückung sollen selbst gelernt werden.
    Tab = 4 Leerzeichen, Shift+Tab rückt aus, Strg/Cmd+Enter = Ausführen.
    ========================================================= */
+/** Senkrechte Einrückungslinien wie in einer IDE: je 4 Leerzeichen ein Strich.
+    Leere Zeilen innerhalb eines Blocks bekommen die Linien des Blocks weiter. */
+function indentGuides(code) {
+  const lines = code.split('\n');
+  const ind = lines.map((l) => (l.trim() ? Math.floor(l.match(/^ */)[0].length / 4) : -1));
+  for (let i = 0; i < ind.length; i++) {
+    if (ind[i] !== -1) continue;
+    let a = i - 1; while (a >= 0 && ind[a] === -1) a--;
+    let b = i + 1; while (b < ind.length && lines[b].trim() === '') b++;
+    ind[i] = a >= 0 && b < ind.length ? Math.min(ind[a], Math.floor(lines[b].match(/^ */)[0].length / 4)) : 0;
+  }
+  return ind.map((n) => '<span class="ig">    </span>'.repeat(n)).join('\n') + '\n';
+}
+
 class CodeEditor {
   constructor(host, { onRun, onCheck, onChange } = {}) {
-    host.innerHTML = `<div class="ed-gutter"></div><div class="ed-area"><pre class="ed-sizer"></pre><pre class="ed-hl" aria-hidden="true"></pre><textarea spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Code-Editor"></textarea></div>`;
+    host.innerHTML = `<div class="ed-gutter"></div><div class="ed-area"><pre class="ed-sizer"></pre><pre class="ed-guides" aria-hidden="true"></pre><pre class="ed-hl" aria-hidden="true"></pre><textarea spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Code-Editor"></textarea></div>`;
     this.host = host;
     this.gutter = $('.ed-gutter', host);
     this.hl = $('.ed-hl', host);
+    this.guides = $('.ed-guides', host);
     this.sizer = $('.ed-sizer', host);
     this.ta = $('textarea', host);
     this.onChange = onChange;
@@ -26,6 +41,7 @@ class CodeEditor {
     // Sizer bestimmt die Größe (Textarea und Highlight liegen absolut darüber)
     this.sizer.textContent = v + '\n';
     this.hl.innerHTML = highlight(v) + '\n';
+    this.guides.innerHTML = indentGuides(v);
     const n = v.split('\n').length;
     this.gutter.textContent = Array.from({ length: n }, (_, i) => i + 1).join('\n');
   }

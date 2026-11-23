@@ -30,7 +30,7 @@ Python-Lern-App im Browser (Level → Aufgabe → automatische Tests) mit Pixel-
 ## Regeln (immer beachten)
 - **Cache-Busting:** Nach jeder Änderung an einer JS-/CSS-Datei deren `?v=`-Nummer in `index.html` erhöhen (Worker: `python-worker.js?v=` in `runner.js`, `harness.py?v=` im Worker). Sonst sehen Nutzer die alte Version.
 - **Farben nur über CSS-Variablen** (`:root` = Maus, `:root[data-theme="squirrel"]` = Nachthimmel, `:root[data-theme="capy"]` = Teich). Keine festen Farbwerte in Regeln – neue Farbe = neues Token in **allen drei** Blöcken. Jede UI-Änderung in allen drei Modi ansehen (im Capy-Modus braucht Text auf dem Wasser ein helles „Floß“).
-- **Editor bleibt „ehrlich“:** kein Auto-Einrücken, keine Auto-Klammern, keine Schrift-Ligaturen. Doppelpunkt & Einrückung sollen gelernt werden.
+- **Editor bleibt „ehrlich“:** kein Auto-Einrücken, keine Auto-Klammern, keine Schrift-Ligaturen. Doppelpunkt & Einrückung sollen gelernt werden. Erlaubt als Hilfe: senkrechte Einrückungslinien je 4 Leerzeichen (`indentGuides()` in `js/editor.js`, Farbe `--guide`).
 - **Erwartete Ausgabe muss klar sein:** neue Tests so schreiben, dass „So soll es aussehen“ (aus den sichtbaren Tests generiert) eindeutig ist. Versteckte Tests (`hidden`) gegen Hardcoding.
 - Mehr Sterne beim Wiederholen eines gelösten Levels nur nach „🔄 Nochmal von vorn“ (`restartFresh()`, `LV.fresh`) – sonst bleibt es bei den bisherigen Sternen.
 - Beim Prüfen ist `random` mit Seed 0 eingefroren (`randint(1, 100)` → 50).
