@@ -119,7 +119,7 @@ function expectedHtml(tests, hidden = false) {
         : `<li><code>${esc(t.expr)}</code> gibt aus: <code>${esc(t.expect)}</code></li>`).join('')}</ul></div>`);
   }
   if (checks.length) parts.push(`<div class="exp-case"><div class="exp-what">Außerdem wird geprüft:</div><ul class="exp-list">${checks.map((t) => `<li>${inline(t.msg)}</li>`).join('')}</ul></div>`);
-  return `<details class="expected" open><summary>👀 So soll es aussehen</summary>${parts.join('')}
+  return `<details class="expected"><summary>👀 So soll es aussehen</summary>${parts.join('')}
     <div class="exp-note muted small">Groß-/Kleinschreibung, Satzzeichen und Leerzeichen zählen mit.${hidden ? ' Zusätzlich gibt es versteckte Tests mit anderen Werten – also nichts fest eintippen.' : ''}</div></details>`;
 }
 
