@@ -551,3 +551,63 @@ table.lb .ex { color: var(--muted); font-size: 13px; }
   .hero-mouse.party, .hero-mouse.boop { animation: none; }
   .screen.active, .ru-inner, .toast { animation: none; }
 }
+
+/* ---------- 📖 Lexikon: Pixel-Buch am Rand + Seitenfenster ---------- */
+.lexicon {
+  --lex-w: clamp(300px, 30vw, 480px);
+  position: fixed; top: 0; right: 0; bottom: 0; width: var(--lex-w); z-index: 42;
+  transform: translateX(100%); transition: transform .28s cubic-bezier(.3, 1.1, .5, 1); pointer-events: none;
+}
+.lexicon.open { transform: none; }
+.lex-toggle {
+  position: absolute; right: 100%; top: 50%; translate: 0 -50%; pointer-events: auto;
+  width: 38px; height: 40px; padding: 0 4px 0 7px; display: grid; place-items: center;
+  background: var(--surface); border: 1.5px solid var(--line2); border-right: 0; border-radius: 12px 0 0 12px;
+  box-shadow: var(--shadow); transition: width .15s, background .15s;
+}
+.lex-toggle:hover { width: 44px; background: var(--surface2); }
+.lex-toggle:focus-visible { outline: 2px solid var(--accent); }
+.lexicon.open .lex-toggle { background: var(--surface2); }
+.lex-book { width: 24px; height: 24px; display: block; }
+.lex-book .px-o { fill: var(--text); }
+.lex-book .px-d { fill: var(--accent-d); }
+.lex-book .px-c { fill: var(--accent); }
+.lex-book .px-g { fill: var(--cheese); }
+.lex-book .px-p { fill: var(--surface); }
+.lex-book .px-r { fill: var(--accent2); }
+.lex-panel {
+  height: 100%; display: flex; flex-direction: column; pointer-events: auto;
+  background: var(--surface); border-left: 1.5px solid var(--line2); box-shadow: var(--shadow-lg);
+  visibility: hidden; transition: visibility 0s .28s;
+}
+.lexicon.open .lex-panel { visibility: visible; transition: none; }
+.lex-head { position: relative; padding: 16px 48px 12px 18px; border-bottom: 1.5px solid var(--line); }
+.lex-head h3 { margin: 0; font-size: 20px; }
+.lex-body { flex: 1; overflow: auto; padding: 6px 14px 20px; overscroll-behavior: contain; }
+.lex-topic h4 { margin: 16px 4px 6px; font-size: 14px; font-family: var(--round); display: flex; gap: 8px; align-items: baseline; }
+.lex-item { border-radius: 10px; }
+.lex-item.open { background: var(--panel2); border: 1.5px solid var(--line); margin: 4px 0; }
+.lex-name {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left;
+  background: none; border: 0; border-radius: 10px; padding: 5px 8px; color: var(--text);
+}
+.lex-name:hover { background: var(--surface2); }
+.lex-name:focus-visible { outline: 2px solid var(--accent); }
+.lex-name code { white-space: normal; word-break: break-word; }
+.lex-chev { color: var(--muted); font-size: 18px; line-height: 1; transition: transform .15s; }
+.lex-item.open .lex-chev { transform: rotate(90deg); }
+.lex-detail { padding: 0 10px 10px; font-size: 14px; }
+.lex-detail p { margin: 4px 0 8px; }
+.lex-detail pre.code { font-size: 13px; padding: 8px 10px; margin: 2px 0 8px; }
+.lex-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: var(--accent-d); }
+.lex-out { color: var(--good); }
+.lex-empty { color: var(--muted); padding: 10px 4px; }
+.lex-more { margin: 18px 4px 0; }
+@media (max-width: 560px) {
+  .lexicon { --lex-w: calc(100vw - 44px); }
+  .lex-toggle { width: 32px; height: 36px; padding: 0 2px 0 5px; }
+  .lex-book { width: 22px; height: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lexicon, .lex-chev, .lex-toggle { transition: none; }
+}

@@ -17,6 +17,7 @@ Python-Lern-App im Browser (Level → Aufgabe → automatische Tests) mit Pixel-
 - `js/mascot.js` – Maskottchen: Sprite-Sets `MOUSE`, `SQUIRREL`, `CAPY` (Zeichen-Raster 24×14, gleiche Frame-Namen; Capybara: `fix1/2` = abtauchen, `peek` = Kopf raus, Hut `CAPY.hat` orange/leaf), `drawMouse()` wählt nach Modus; `Mascot.react()`, `HeroMouse` (Startseite).
 - Modus: `save.theme` (`mouse`/`squirrel`/`capy`) → `data-theme` auf `<html>`; `js/theme-init.js` setzt ihn schon im `<head>` und malt die Teich-Kachel (`--pond`); `setTheme()` in `js/ui.js` wechselt Modus, Logo, Tab-Titel und Favicon (`THEME_INFO`).
 - `js/flavor.js` – **alle tierischen Texte je Modus** (Name, Startseiten-Spruch, Sprüche, Ränge, Easter-Egg-Wort/-Texte). Neue tierische Texte immer hier für alle drei Tiere eintragen, nie fest in andere Dateien. Geräusche: `Sound.animal()` (Maus piept, Erdhörnchen tschirpt, Capybara pfeift/schnurrt).
+- `js/lexicon.js` + `js/lexicon-data.js` – 📖 Lexikon: Pixel-Buch am rechten Rand öffnet ein Seitenfenster mit allen Befehlen aus gelösten Levels (≥1 ⭐, Feld `from`), nach Thema; Klick klappt Erklärung, Syntax, Beispiel, Ausgabe auf. Neue Befehle in Leveln auch hier eintragen (Beispiel-Ausgabe muss stimmen).
 - `js/music.js` (Lofi-Song, WebAudio), `js/easter.js` (Käse-Easter-Egg), `js/feedback.js` (KI-Prompt in die Zwischenablage).
 - `js/net.js`, `js/social.js`, `js/ranks.js`, `js/quests.js`, `js/puzzle.js` – Online-Funktionen.
 - `supabase/schema.sql` + `supabase/update-*.sql` – Datenbank. `supabase/functions/review` ist **ungenutzt** (altes Claude-Feedback).

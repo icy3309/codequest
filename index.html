@@ -9,7 +9,7 @@
   <title>Mausequest – Programmieren lernen</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐭</text></svg>">
   <script src="js/theme-init.js?v=2"></script>
-  <link rel="stylesheet" href="style.css?v=18">
+  <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
   <canvas id="fx"></canvas>
@@ -233,6 +233,18 @@
   </div>
   <div class="toasts" id="toasts"></div>
 
+  <!-- ===== 📖 LEXIKON (Seitenfenster) ===== -->
+  <div class="lexicon" id="lexicon">
+    <button class="lex-toggle" id="lexToggle" aria-controls="lexPanel" aria-expanded="false" title="Lexikon – schon gelernte Befehle nachschlagen"></button>
+    <aside class="lex-panel" id="lexPanel" aria-label="Lexikon">
+      <div class="lex-head">
+        <div><h3>Lexikon</h3><div class="muted small" id="lexCount"></div></div>
+        <button class="x" id="lexClose" title="Schließen">✕</button>
+      </div>
+      <div class="lex-body" id="lexBody"></div>
+    </aside>
+  </div>
+
   <script src="js/config.js?v=10"></script>
   <script src="js/util.js?v=3"></script>
   <script src="js/store.js?v=6"></script>
@@ -262,8 +274,10 @@
   <script src="js/mascot.js?v=10"></script>
   <script src="js/music.js?v=2"></script>
   <script src="js/easter.js?v=4"></script>
+  <script src="js/lexicon-data.js?v=1"></script>
+  <script src="js/lexicon.js?v=1"></script>
   <script src="js/levels.js?v=15"></script>
   <script src="js/legal.js?v=10"></script>
-  <script src="js/main.js?v=6"></script>
+  <script src="js/main.js?v=7"></script>
 </body>
 </html>

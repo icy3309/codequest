@@ -37,6 +37,7 @@ function init() {
   initQuests();
   initPuzzle();
   initLevels();
+  initLexicon();
   initLegal();
   paintStaticMice();
   Mascot.init();
